@@ -101,6 +101,22 @@
         </div>
     </div>
 
+    <!-- Change Password Modal -->
+    <div id="password-modal" class="modal hidden">
+        <div class="modal-backdrop" data-close-password></div>
+        <div class="modal-content">
+            <button class="modal-close" data-close-password>&times;</button>
+            <h2 data-i18n="auth.changePasswordTitle" style="margin-bottom:1.25rem"></h2>
+            <form id="password-form" class="auth-form">
+                <input type="password" name="current_password" data-i18n-placeholder="auth.currentPasswordPlaceholder" required minlength="8">
+                <input type="password" name="new_password" data-i18n-placeholder="auth.newPasswordPlaceholder" required minlength="8">
+                <input type="password" name="confirm_password" data-i18n-placeholder="auth.confirmPasswordPlaceholder" required minlength="8">
+                <button type="submit" class="btn-primary" data-i18n="auth.changePasswordBtn"></button>
+                <p id="password-error" class="form-error hidden"></p>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-links">

@@ -26,7 +26,7 @@ final class User
 
     public static function findById(int $id): ?array
     {
-        $stmt = Database::pdo()->prepare('SELECT id, email, is_active, created_at FROM users WHERE id = :id LIMIT 1');
+        $stmt = Database::pdo()->prepare('SELECT id, email, is_active, is_admin, created_at FROM users WHERE id = :id LIMIT 1');
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
         return $row ?: null;
@@ -34,7 +34,7 @@ final class User
 
     public static function all(): array
     {
-        return Database::pdo()->query('SELECT id, email, is_active, created_at FROM users ORDER BY created_at DESC')->fetchAll();
+        return Database::pdo()->query('SELECT id, email, is_active, is_admin, created_at FROM users ORDER BY created_at DESC')->fetchAll();
     }
 
     public static function delete(int $id): bool
@@ -47,5 +47,19 @@ final class User
     {
         $stmt = Database::pdo()->prepare('UPDATE users SET is_active = :active WHERE id = :id');
         return $stmt->execute(['active' => $active ? 1 : 0, 'id' => $id]);
+    }
+
+    public static function findByIdFull(int $id): ?array
+    {
+        $stmt = Database::pdo()->prepare('SELECT * FROM users WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    public static function updatePassword(int $id, string $passwordHash): bool
+    {
+        $stmt = Database::pdo()->prepare('UPDATE users SET password_hash = :hash WHERE id = :id');
+        return $stmt->execute(['hash' => $passwordHash, 'id' => $id]);
     }
 }

@@ -44,7 +44,14 @@
         "passwordHint": "Password (min. 8 characters)",
         "loginBtn": "Sign in",
         "registerBtn": "Sign up",
-        "logoutBtn": "Sign out"
+        "logoutBtn": "Sign out",
+        "changePasswordTitle": "Change Password",
+        "changePasswordLink": "Change password",
+        "changePasswordBtn": "Change Password",
+        "currentPasswordPlaceholder": "Current password",
+        "newPasswordPlaceholder": "New password",
+        "confirmPasswordPlaceholder": "Confirm new password",
+        "passwordMismatch": "Passwords do not match"
     },
     "toast": {
         "copied": "Copied!",
@@ -53,7 +60,8 @@
         "logoutSuccess": "Signed out",
         "updated": "Link updated!",
         "deleted": "Link deleted",
-        "unknownError": "Unknown error"
+        "unknownError": "Unknown error",
+        "passwordChanged": "Password changed!"
     },
     "footer": {
         "terms": "Terms of Use",

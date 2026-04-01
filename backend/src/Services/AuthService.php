@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Core\Session;
 use App\Models\User;
-use App\Models\Admin;
 
 final class AuthService
 {
@@ -68,5 +67,24 @@ final class AuthService
     public static function logout(): void
     {
         Session::destroy();
+    }
+
+    public static function changePassword(int $userId, string $currentPassword, string $newPassword): void
+    {
+        $user = User::findByIdFull($userId);
+        if (!$user) {
+            throw new \InvalidArgumentException('User not found');
+        }
+
+        if (!password_verify($currentPassword, $user['password_hash'])) {
+            throw new \InvalidArgumentException('Current password is incorrect');
+        }
+
+        if (strlen($newPassword) < 8) {
+            throw new \InvalidArgumentException('New password must be at least 8 characters');
+        }
+
+        $hash = password_hash($newPassword, PASSWORD_ARGON2ID);
+        User::updatePassword($userId, $hash);
     }
 }

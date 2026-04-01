@@ -44,7 +44,14 @@
         "passwordHint": "Senha (mín. 8 caracteres)",
         "loginBtn": "Entrar",
         "registerBtn": "Cadastrar",
-        "logoutBtn": "Sair"
+        "logoutBtn": "Sair",
+        "changePasswordTitle": "Alterar Senha",
+        "changePasswordLink": "Alterar senha",
+        "changePasswordBtn": "Alterar Senha",
+        "currentPasswordPlaceholder": "Senha atual",
+        "newPasswordPlaceholder": "Nova senha",
+        "confirmPasswordPlaceholder": "Confirmar nova senha",
+        "passwordMismatch": "As senhas não coincidem"
     },
     "toast": {
         "copied": "Copiado!",
@@ -53,7 +60,8 @@
         "logoutSuccess": "Desconectado",
         "updated": "Link atualizado!",
         "deleted": "Link excluído",
-        "unknownError": "Erro desconhecido"
+        "unknownError": "Erro desconhecido",
+        "passwordChanged": "Senha alterada!"
     },
     "footer": {
         "terms": "Termos de Uso",

@@ -27,6 +27,9 @@
     const registerForm = $('#register-form');
     const loginError   = $('#login-error');
     const registerError = $('#register-error');
+    const passwordModal = $('#password-modal');
+    const passwordForm  = $('#password-form');
+    const passwordError = $('#password-error');
     const shortenForm  = $('#shorten-form');
     const urlInput     = $('#url-input');
     const aliasInput   = $('#alias-input');
@@ -61,7 +64,7 @@
             localStorage.setItem('lang', code);
             document.documentElement.setAttribute('lang', code);
             applyTranslations();
-            langIcon.textContent = lang.meta.flag;
+            langIcon.textContent = (LANG_META[code] || {}).flag || lang.meta.flag;
         } catch (e) {
             if (code !== DEFAULT_LANG) await loadLanguage(DEFAULT_LANG);
         }
@@ -196,7 +199,9 @@
         if (currentUser) {
             authArea.innerHTML =
                 '<span style="font-size:0.9rem;color:var(--text-secondary)">' + escapeHtml(currentUser.email) + '</span>' +
+                '<button class="btn-secondary btn-small" id="change-pw-btn" title="' + escapeHtml(t('auth.changePasswordLink')) + '">🔒</button>' +
                 '<button class="btn-secondary btn-small" id="logout-btn">' + escapeHtml(t('auth.logoutBtn')) + '</button>';
+            $('#change-pw-btn').addEventListener('click', function () { passwordModal.classList.remove('hidden'); });
             $('#logout-btn').addEventListener('click', handleLogout);
             myUrlsSection.classList.remove('hidden');
             loadMyUrls();
@@ -226,6 +231,9 @@
     // Close modal
     $$('[data-close-modal]').forEach(function (el) {
         el.addEventListener('click', function () { authModal.classList.add('hidden'); });
+    });
+    $$('[data-close-password]').forEach(function (el) {
+        el.addEventListener('click', function () { passwordModal.classList.add('hidden'); passwordForm.reset(); passwordError.classList.add('hidden'); });
     });
 
     // ── Login ────────────────────────────────────────────────
@@ -263,6 +271,29 @@
         } catch (err) {
             registerError.textContent = err.message;
             registerError.classList.remove('hidden');
+        }
+    });
+
+    // ── Change password ──────────────────────────────────────
+    passwordForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        passwordError.classList.add('hidden');
+        var currentPw = passwordForm.current_password.value;
+        var newPw = passwordForm.new_password.value;
+        var confirmPw = passwordForm.confirm_password.value;
+        if (newPw !== confirmPw) {
+            passwordError.textContent = t('auth.passwordMismatch');
+            passwordError.classList.remove('hidden');
+            return;
+        }
+        try {
+            await api('PUT', '/password', { current_password: currentPw, new_password: newPw });
+            passwordModal.classList.add('hidden');
+            passwordForm.reset();
+            toast(t('toast.passwordChanged'));
+        } catch (err) {
+            passwordError.textContent = err.message;
+            passwordError.classList.remove('hidden');
         }
     });
 
@@ -413,7 +444,21 @@
         return str.replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    // ── Check existing session ─────────────────────────────────
+    async function checkSession() {
+        try {
+            var data = await api('GET', '/me');
+            currentUser = data.user;
+        } catch (_) {
+            currentUser = null;
+        }
+    }
+
     // ── Init ─────────────────────────────────────────────────
     initTheme();
-    loadLanguage(detectLanguage());
+    loadLanguage(detectLanguage()).then(function () {
+        checkSession().then(function () {
+            renderAuthArea();
+        });
+    });
 })();

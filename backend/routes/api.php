@@ -19,6 +19,8 @@ $authAdmin = [AuthMiddleware::class, 'admin'];
 $router->post('/api/v1/register', [AuthController::class, 'register'], [$rateLimit]);
 $router->post('/api/v1/login',    [AuthController::class, 'login'],    [$rateLimit]);
 $router->post('/api/v1/logout',   [AuthController::class, 'logout']);
+$router->get('/api/v1/me',        [AuthController::class, 'me']);
+$router->put('/api/v1/password',   [AuthController::class, 'changePassword'], [$authUser]);
 
 // ── URLs (authenticated user) ──────────────────────────────────
 $router->post('/api/v1/shorten',       [UrlController::class, 'shorten'],  [$rateLimit]);

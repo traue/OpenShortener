@@ -11,6 +11,6 @@ return [
         'window'  => 60,   // seconds
         'max_hits' => 30,  // requests per window
     ],
-    'short_code_len' => 6,
+    'short_code_len' => 5,
     'cors_origin'    => Env::get('CORS_ORIGIN', '*'),
 ];

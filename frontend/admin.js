@@ -19,6 +19,8 @@
 
     var langToggle   = $('#lang-toggle');
     var langIcon     = $('#lang-icon');
+    var langMenu     = $('#lang-menu');
+    var langDropdown = langToggle.closest('.lang-dropdown');
     var themeToggle  = $('#theme-toggle');
     var themeIcon    = $('#theme-icon');
     var adminArea    = $('#admin-area');
@@ -56,7 +58,7 @@
             localStorage.setItem('lang', code);
             document.documentElement.setAttribute('lang', code);
             applyTranslations();
-            langIcon.textContent = lang.meta.flag;
+            langIcon.textContent = (LANG_META[code] || {}).flag || lang.meta.flag;
         } catch (e) {
             if (code !== DEFAULT_LANG) await loadLanguage(DEFAULT_LANG);
         }
@@ -89,10 +91,49 @@
         }
     }
 
-    langToggle.addEventListener('click', function () {
-        var idx = SUPPORTED_LANGS.indexOf(langCode);
-        var next = SUPPORTED_LANGS[(idx + 1) % SUPPORTED_LANGS.length];
-        loadLanguage(next);
+    // ── Language metadata ────────────────────────────────────
+    var LANG_META = {
+        'en':    { flag: '🇺🇸', name: 'English' },
+        'pt-BR': { flag: '🇧🇷', name: 'Português (BR)' }
+    };
+
+    function renderLangMenu() {
+        langMenu.innerHTML = SUPPORTED_LANGS.map(function (code) {
+            var m = LANG_META[code] || { flag: '🌐', name: code };
+            var active = code === langCode ? ' active' : '';
+            var check = code === langCode ? '<span class="lang-option-check">✓</span>' : '';
+            return '<button class="lang-option' + active + '" data-lang="' + code + '">' +
+                '<span class="lang-option-flag">' + m.flag + '</span>' +
+                '<span class="lang-option-name">' + m.name + '</span>' +
+                check +
+            '</button>';
+        }).join('');
+
+        langMenu.querySelectorAll('.lang-option').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                loadLanguage(btn.getAttribute('data-lang'));
+                langDropdown.classList.remove('open');
+                langMenu.classList.add('hidden');
+            });
+        });
+    }
+
+    langToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = langDropdown.classList.contains('open');
+        if (isOpen) {
+            langDropdown.classList.remove('open');
+            langMenu.classList.add('hidden');
+        } else {
+            renderLangMenu();
+            langDropdown.classList.add('open');
+            langMenu.classList.remove('hidden');
+        }
+    });
+
+    document.addEventListener('click', function () {
+        langDropdown.classList.remove('open');
+        langMenu.classList.add('hidden');
     });
 
     // ── Theme ────────────────────────────────────────────────

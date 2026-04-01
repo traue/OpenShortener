@@ -27,28 +27,35 @@ final class UrlService
             }
             $shortCode = $alias;
         } else {
-            // Create entry with placeholder, then encode ID
-            $id = Url::create($originalUrl, '__temp__', $userId, $expiresAt);
-            $shortCode = Base62Service::encode($id);
+            // Generate random short code with retry on collision
+            $codeLen = max(3, (int) ($cfg['short_code_len'] ?? 5));
+            $maxAttempts = 10;
 
-            // Ensure uniqueness (very unlikely collision)
-            $attempts = 0;
-            while (Url::codeExists($shortCode)) {
-                $shortCode = Base62Service::generateRandom($cfg['short_code_len']);
-                if (++$attempts > 5) {
-                    throw new \RuntimeException('Failed to generate unique code');
+            for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+                $shortCode = Base62Service::generateRandom($codeLen);
+                try {
+                    $id = Url::create($originalUrl, $shortCode, $userId, $expiresAt);
+                    return [
+                        'id'         => $id,
+                        'short_code' => $shortCode,
+                        'short_url'  => $cfg['base_url'] . '/' . $shortCode,
+                        'original_url' => $originalUrl,
+                        'expires_at' => $expiresAt,
+                    ];
+                } catch (\PDOException $e) {
+                    // Duplicate key (SQLSTATE 23000) — retry with new code
+                    if ($e->getCode() === '23000') {
+                        // After several failures, increase code length
+                        if ($attempt >= 5) {
+                            $codeLen++;
+                        }
+                        continue;
+                    }
+                    throw $e;
                 }
             }
 
-            Url::update($id, ['short_code' => $shortCode]);
-
-            return [
-                'id'         => $id,
-                'short_code' => $shortCode,
-                'short_url'  => $cfg['base_url'] . '/' . $shortCode,
-                'original_url' => $originalUrl,
-                'expires_at' => $expiresAt,
-            ];
+            throw new \RuntimeException('Failed to generate unique short code');
         }
 
         // Alias path

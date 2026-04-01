@@ -93,4 +93,11 @@ final class Url
             'SELECT id, original_url, short_code, user_id, expires_at, clicks, is_active, created_at FROM urls ORDER BY created_at DESC'
         )->fetchAll();
     }
+
+    public static function allWithOwner(): array
+    {
+        return Database::pdo()->query(
+            'SELECT u.id, u.original_url, u.short_code, u.user_id, u.expires_at, u.clicks, u.is_active, u.created_at, usr.email AS owner_email FROM urls u LEFT JOIN users usr ON u.user_id = usr.id ORDER BY u.created_at DESC'
+        )->fetchAll();
+    }
 }
