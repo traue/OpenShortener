@@ -138,6 +138,8 @@
         "userBlocked": "Usuário bloqueado",
         "userActivated": "Usuário ativado",
         "noUsers": "Nenhum usuário encontrado.",
-        "noLinks": "Nenhum link encontrado."
+        "noLinks": "Nenhum link encontrado.",
+        "viewLinksBtn": "Ver links",
+        "youLabel": "voc\u00ea"
     }
 }

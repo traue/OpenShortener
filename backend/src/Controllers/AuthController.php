@@ -56,7 +56,7 @@ final class AuthController
             Response::error('Unauthorized', 401);
             return;
         }
-        Response::json(['user' => ['id' => (int) $user['id'], 'email' => $user['email']]]);
+        Response::json(['user' => ['id' => (int) $user['id'], 'email' => $user['email'], 'is_admin' => (bool) (int) ($user['is_admin'] ?? 0)]]);
     }
 
     public function changePassword(array $params): void

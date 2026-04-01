@@ -30,9 +30,11 @@ $router->delete('/api/v1/urls/{id}',   [UrlController::class, 'delete'],   [$aut
 
 // ── Admin ──────────────────────────────────────────────────────
 $router->post('/api/v1/admin/login',          [AdminController::class, 'login'],      [$rateLimit]);
+$router->get('/api/v1/admin/me',              [AdminController::class, 'me'],          [$authAdmin]);
 $router->get('/api/v1/admin/users',           [AdminController::class, 'listUsers'],  [$authAdmin]);
 $router->delete('/api/v1/admin/users/{id}',   [AdminController::class, 'deleteUser'], [$authAdmin]);
 $router->put('/api/v1/admin/users/{id}',      [AdminController::class, 'blockUser'],  [$authAdmin]);
+$router->get('/api/v1/admin/users/{id}/urls', [AdminController::class, 'listUserUrls'], [$authAdmin]);
 $router->get('/api/v1/admin/urls',            [AdminController::class, 'listUrls'],   [$authAdmin]);
 $router->delete('/api/v1/admin/urls/{id}',    [AdminController::class, 'deleteUrl'],  [$authAdmin]);
 

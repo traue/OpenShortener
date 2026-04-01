@@ -899,6 +899,12 @@ input:focus {
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
+.status-admin {
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 600px) {
     .input-group {

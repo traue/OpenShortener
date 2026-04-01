@@ -50,18 +50,26 @@ final class AuthService
         return ['id' => (int) $user['id'], 'email' => $user['email']];
     }
 
-    public static function adminLogin(string $username, string $password): array
+    public static function adminLogin(string $email, string $password): array
     {
-        $admin = Admin::findByUsername($username);
+        $user = User::findByEmail($email);
 
-        if (!$admin || !password_verify($password, $admin['password_hash'])) {
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            throw new \InvalidArgumentException('Invalid credentials');
+        }
+
+        if (!$user['is_active']) {
+            throw new \InvalidArgumentException('Account is blocked');
+        }
+
+        if (!(int) $user['is_admin']) {
             throw new \InvalidArgumentException('Invalid credentials');
         }
 
         Session::regenerate();
-        Session::set('admin_id', (int) $admin['id']);
+        Session::set('user_id', (int) $user['id']);
 
-        return ['id' => (int) $admin['id'], 'username' => $admin['username']];
+        return ['id' => (int) $user['id'], 'email' => $user['email']];
     }
 
     public static function logout(): void

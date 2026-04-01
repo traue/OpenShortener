@@ -196,7 +196,7 @@
         loginSection.classList.add('hidden');
         dashboard.classList.remove('hidden');
         adminArea.innerHTML =
-            '<span style="font-size:0.9rem;color:var(--text-secondary)">' + escapeHtml(adminUser.username) + '</span>' +
+            '<span style="font-size:0.9rem;color:var(--text-secondary)">' + escapeHtml(adminUser.email) + '</span>' +
             '<button class="btn-secondary btn-small" id="admin-logout-btn">' + escapeHtml(t('auth.logoutBtn')) + '</button>';
         $('#admin-logout-btn').addEventListener('click', handleLogout);
         loadAllData();
@@ -211,10 +211,10 @@
     loginForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         loginError.classList.add('hidden');
-        var username = loginForm.username.value.trim();
+        var email = loginForm.email.value.trim();
         var password = loginForm.password.value;
         try {
-            var data = await api('POST', '/admin/login', { username: username, password: password });
+            var data = await api('POST', '/admin/login', { email: email, password: password });
             adminUser = data.admin;
             loginForm.reset();
             showDashboard();
@@ -236,10 +236,8 @@
     // ── Check existing session ───────────────────────────────
     async function checkSession() {
         try {
-            var users = await api('GET', '/admin/users');
-            // If we get here, session is valid
-            adminUser = { username: 'admin' };
-            usersData = users;
+            var data = await api('GET', '/admin/me');
+            adminUser = data.admin;
             showDashboard();
             return true;
         } catch (_) {
@@ -286,20 +284,27 @@
 
         usersTbody.innerHTML = users.map(function (u) {
             var isActive = Number(u.is_active) === 1;
+            var isAdmin = Number(u.is_admin) === 1;
+            var isSelf = adminUser && Number(u.id) === Number(adminUser.id);
             var statusClass = isActive ? 'status-active' : 'status-blocked';
             var statusText = isActive ? t('admin.statusActive') : t('admin.statusBlocked');
             var toggleLabel = isActive ? t('admin.blockBtn') : t('admin.unblockBtn');
             var toggleIcon = isActive ? '🚫' : '✅';
+            var adminBadge = isAdmin ? ' <span class="status-badge status-admin">Admin</span>' : '';
+            var selfLabel = isSelf ? ' <span style="color:var(--text-secondary);font-size:0.75rem">(' + escapeHtml(t('admin.youLabel')) + ')</span>' : '';
+
+            var actions = '<button class="btn-icon-sm" onclick="window.__viewUserLinks(' + u.id + ', \'' + escapeHtml(u.email).replace(/'/g, "\\'") + '\')" title="' + escapeHtml(t('admin.viewLinksBtn')) + '">🔗</button>';
+            if (!isSelf) {
+                actions += '<button class="btn-icon-sm" onclick="window.__toggleUser(' + u.id + ', ' + (isActive ? 'false' : 'true') + ')" title="' + escapeHtml(toggleLabel) + '">' + toggleIcon + '</button>';
+                actions += '<button class="btn-icon-sm danger" onclick="window.__deleteUser(' + u.id + ', \'' + escapeHtml(u.email).replace(/'/g, "\\'") + '\')" title="' + escapeHtml(t('admin.deleteBtn')) + '">🗑️</button>';
+            }
 
             return '<tr>' +
                 '<td class="col-id">' + u.id + '</td>' +
-                '<td>' + escapeHtml(u.email) + '</td>' +
+                '<td>' + escapeHtml(u.email) + adminBadge + selfLabel + '</td>' +
                 '<td><span class="status-badge ' + statusClass + '">' + escapeHtml(statusText) + '</span></td>' +
                 '<td class="col-date">' + formatDate(u.created_at) + '</td>' +
-                '<td class="col-actions">' +
-                    '<button class="btn-icon-sm" onclick="window.__toggleUser(' + u.id + ', ' + (isActive ? 'false' : 'true') + ')" title="' + escapeHtml(toggleLabel) + '">' + toggleIcon + '</button>' +
-                    '<button class="btn-icon-sm danger" onclick="window.__deleteUser(' + u.id + ', \'' + escapeHtml(u.email) + '\')" title="' + escapeHtml(t('admin.deleteBtn')) + '">🗑️</button>' +
-                '</td>' +
+                '<td class="col-actions">' + actions + '</td>' +
             '</tr>';
         }).join('');
     }
@@ -315,7 +320,7 @@
 
         urlsTbody.innerHTML = urls.map(function (u) {
             var exp = u.expires_at ? formatDate(u.expires_at) : '∞';
-            var owner = u.user_id ? '#' + u.user_id : '—';
+            var owner = u.owner_email ? escapeHtml(u.owner_email) : '—';
 
             return '<tr>' +
                 '<td class="col-id">' + u.id + '</td>' +
@@ -374,6 +379,17 @@
         navigator.clipboard.writeText(url).then(function () { toast(t('toast.copied')); });
     };
 
+    window.__viewUserLinks = function (userId, email) {
+        // Switch to URLs tab
+        $$('.admin-tab').forEach(function (t) { t.classList.remove('active'); });
+        document.querySelector('.admin-tab[data-panel="urls"]').classList.add('active');
+        $$('.admin-panel').forEach(function (p) { p.classList.add('hidden'); });
+        $('#panel-urls').classList.remove('hidden');
+        // Filter by owner email
+        urlsSearch.value = email;
+        urlsSearch.dispatchEvent(new Event('input'));
+    };
+
     // ── Tabs ─────────────────────────────────────────────────
     $$('.admin-tab').forEach(function (tab) {
         tab.addEventListener('click', function () {
@@ -401,6 +417,7 @@
         var filtered = urlsData.filter(function (u) {
             return u.original_url.toLowerCase().indexOf(q) !== -1 ||
                    u.short_code.toLowerCase().indexOf(q) !== -1 ||
+                   (u.owner_email && u.owner_email.toLowerCase().indexOf(q) !== -1) ||
                    String(u.id).indexOf(q) !== -1;
         });
         renderUrlsTable(filtered);
