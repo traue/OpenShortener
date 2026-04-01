@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="terms.pageTitle">Termos de Uso – OpenShortner</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .terms { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem; }
+        .terms h1 { margin-bottom: 1.5rem; }
+        .terms h2 { margin-top: 2rem; margin-bottom: 0.75rem; font-size: 1.25rem; }
+        .terms p, .terms li { color: var(--text-secondary); line-height: 1.7; margin-bottom: 0.75rem; }
+        .terms ul { padding-left: 1.5rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">OpenShortner</a>
+        </div>
+        <div class="header-right">
+            <button id="lang-toggle" class="btn-icon" title="Language" aria-label="Language">
+                <span id="lang-icon">🇧🇷</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="terms" id="terms-content"></main>
+
+    <footer class="footer">
+        <p class="footer-copy" data-i18n="footer.copy"></p>
+    </footer>
+
+    <script>
+    (function () {
+        var SUPPORTED = ['en', 'pt-BR'];
+        var DEFAULT = 'en';
+
+        function detect() {
+            var s = localStorage.getItem('lang');
+            if (s && SUPPORTED.indexOf(s) !== -1) return s;
+            var n = navigator.language || '';
+            for (var i = 0; i < SUPPORTED.length; i++) {
+                if (n.toLowerCase().indexOf(SUPPORTED[i].toLowerCase()) === 0) return SUPPORTED[i];
+                if (n.toLowerCase().indexOf(SUPPORTED[i].split('-')[0]) === 0) return SUPPORTED[i];
+            }
+            return DEFAULT;
+        }
+
+        var theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+
+        var currentLang = detect();
+
+        function load(code) {
+            fetch('/i18n/' + code + '.json').then(function (r) { return r.json(); }).then(function (lang) {
+                currentLang = code;
+                localStorage.setItem('lang', code);
+                document.documentElement.setAttribute('lang', code);
+                document.getElementById('lang-icon').textContent = lang.meta.flag;
+                document.title = lang.terms.pageTitle;
+
+                var tm = lang.terms;
+                var html = '<h1>' + esc(tm.title) + '</h1>';
+                html += '<h2>' + esc(tm.s1Title) + '</h2><p>' + esc(tm.s1Text) + '</p>';
+                html += '<h2>' + esc(tm.s2Title) + '</h2><p>' + esc(tm.s2Text) + '</p><ul>';
+                tm.s2Items.forEach(function (i) { html += '<li>' + esc(i) + '</li>'; });
+                html += '</ul>';
+                html += '<h2>' + esc(tm.s3Title) + '</h2><p>' + esc(tm.s3Text) + '</p>';
+                html += '<h2>' + esc(tm.s4Title) + '</h2><p>' + esc(tm.s4Text1) + '</p><p>' + esc(tm.s4Text2) + '</p>';
+                html += '<h2>' + esc(tm.s5Title) + '</h2><p>' + esc(tm.s5Text) + '</p><ul>';
+                tm.s5Items.forEach(function (i) { html += '<li>' + esc(i) + '</li>'; });
+                html += '</ul><p>' + esc(tm.s5Extra) + '</p>';
+                html += '<h2>' + esc(tm.s6Title) + '</h2><p>' + esc(tm.s6Text) + '</p>';
+                html += '<h2>' + esc(tm.s7Title) + '</h2><p>' + esc(tm.s7Text) + ' <a href="https://github.com/thiagotraue/openshortner" target="_blank" rel="noopener">' + esc(tm.s7Link) + '</a>.</p>';
+
+                document.getElementById('terms-content').innerHTML = html;
+
+                var fc = document.querySelector('[data-i18n="footer.copy"]');
+                if (fc) fc.textContent = lang.footer.copy;
+            });
+        }
+
+        function esc(s) {
+            var d = document.createElement('div');
+            d.appendChild(document.createTextNode(s));
+            return d.innerHTML;
+        }
+
+        document.getElementById('lang-toggle').addEventListener('click', function () {
+            var idx = SUPPORTED.indexOf(currentLang);
+            load(SUPPORTED[(idx + 1) % SUPPORTED.length]);
+        });
+
+        load(currentLang);
+    })();
+    </script>
+</body>
+</html>

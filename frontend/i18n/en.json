@@ -1,0 +1,135 @@
+{
+    "meta": {
+        "code": "en",
+        "name": "English",
+        "flag": "🇺🇸"
+    },
+    "header": {
+        "themeToggle": "Toggle theme"
+    },
+    "hero": {
+        "title": "Shorten your links",
+        "subtitle": "Paste a long URL and get a short link instantly."
+    },
+    "form": {
+        "urlPlaceholder": "https://yoururl.com/very-long-path",
+        "aliasPlaceholder": "Custom alias (optional)",
+        "aliasTitle": "Only letters, numbers, hyphens and underscores",
+        "expiresTitle": "Expiration (optional)",
+        "enableExpiration": "Set expiration",
+        "shortenBtn": "Shorten",
+        "copyBtn": "Copy"
+    },
+    "myUrls": {
+        "title": "My Links",
+        "empty": "No links yet. Shorten a URL above to get started!",
+        "expires": "Expires",
+        "noExpiration": "No expiration",
+        "clicks": "clicks",
+        "deleteBtn": "Delete",
+        "copyBtn": "Copy link",
+        "editBtn": "Edit",
+        "qrBtn": "QR Code",
+        "confirmDelete": "Delete this link?",
+        "editTitle": "Edit Link",
+        "editUrlPlaceholder": "New destination URL",
+        "editSave": "Save",
+        "editCancel": "Cancel"
+    },
+    "auth": {
+        "loginTab": "Sign in",
+        "registerTab": "Sign up",
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Password",
+        "passwordHint": "Password (min. 8 characters)",
+        "loginBtn": "Sign in",
+        "registerBtn": "Sign up",
+        "logoutBtn": "Sign out"
+    },
+    "toast": {
+        "copied": "Copied!",
+        "loginSuccess": "Signed in!",
+        "registerSuccess": "Account created!",
+        "logoutSuccess": "Signed out",
+        "updated": "Link updated!",
+        "deleted": "Link deleted",
+        "unknownError": "Unknown error"
+    },
+    "footer": {
+        "terms": "Terms of Use",
+        "donate": "Buy me a coffee",
+        "copy": "© 2026 OpenShortner · AGPL-3.0 license"
+    },
+    "errorPage": {
+        "title": "Link not found",
+        "heading": "404",
+        "message": "This link does not exist or has expired.",
+        "back": "← Back to home"
+    },
+    "terms": {
+        "pageTitle": "Terms of Use – OpenShortner",
+        "title": "Terms of Use",
+        "s1Title": "1. Use of Service",
+        "s1Text": "OpenShortner is a free URL shortening service. By using this service, you agree to the terms below.",
+        "s2Title": "2. Prohibited Use",
+        "s2Text": "It is strictly prohibited to use the service for:",
+        "s2Items": [
+            "Distribution of malware, phishing or malicious content",
+            "Links to illegal content in any jurisdiction",
+            "Unsolicited spam or bulk messaging",
+            "Copyright or intellectual property infringement",
+            "Any activity that violates local, state or federal laws"
+        ],
+        "s3Title": "3. Link Removal",
+        "s3Text": "We reserve the right to remove any link or block any account at any time, without prior notice, in case of violation of these terms or for any other reason.",
+        "s4Title": "4. Disclaimer",
+        "s4Text1": "OpenShortner is not responsible for the content of shortened URLs. The service is provided \"as is\", without warranties of any kind, express or implied.",
+        "s4Text2": "We are not responsible for direct, indirect, incidental or consequential damages arising from the use of the service.",
+        "s5Title": "5. Data Storage",
+        "s5Text": "We store the following information:",
+        "s5Items": [
+            "Original and shortened URLs",
+            "User email (when registered)",
+            "Click count",
+            "Link creation and expiration dates",
+            "IP address for rate limiting purposes"
+        ],
+        "s5Extra": "We do not share personal data with third parties.",
+        "s6Title": "6. Changes to Terms",
+        "s6Text": "These terms may be changed at any time. Continued use of the service after changes implies acceptance of the new terms.",
+        "s7Title": "7. Contact",
+        "s7Text": "For questions or reports, open an issue on the",
+        "s7Link": "GitHub repository"
+    },
+    "admin": {
+        "badge": "Admin",
+        "loginTitle": "Admin Panel",
+        "loginSubtitle": "Sign in to manage the platform.",
+        "usernamePlaceholder": "Username",
+        "usersTab": "Users",
+        "linksTab": "Links",
+        "usersTitle": "User Management",
+        "linksTitle": "Link Management",
+        "searchPlaceholder": "Search…",
+        "colEmail": "Email",
+        "colStatus": "Status",
+        "colCreated": "Created",
+        "colActions": "Actions",
+        "colOriginalUrl": "Original URL",
+        "colShortUrl": "Short URL",
+        "colOwner": "Owner",
+        "colClicks": "Clicks",
+        "colExpires": "Expires",
+        "statusActive": "Active",
+        "statusBlocked": "Blocked",
+        "blockBtn": "Block user",
+        "unblockBtn": "Unblock user",
+        "deleteBtn": "Delete",
+        "confirmDeleteUser": "Delete user {email}? This cannot be undone.",
+        "confirmDeleteUrl": "Delete this link? This cannot be undone.",
+        "userBlocked": "User blocked",
+        "userActivated": "User activated",
+        "noUsers": "No users found.",
+        "noLinks": "No links found."
+    }
+}

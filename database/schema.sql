@@ -1,0 +1,49 @@
+CREATE DATABASE IF NOT EXISTS openshortner
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE openshortner;
+
+CREATE TABLE users (
+    id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    email      VARCHAR(255)  NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    is_active  TINYINT(1)    NOT NULL DEFAULT 1,
+    created_at DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE admins (
+    id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    username      VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE urls (
+    id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    original_url TEXT            NOT NULL,
+    short_code   VARCHAR(20)     NOT NULL UNIQUE,
+    user_id      BIGINT UNSIGNED NULL,
+    expires_at   DATETIME        NULL,
+    clicks       BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    is_active    TINYINT(1)      NOT NULL DEFAULT 1,
+    created_at   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_urls_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_urls_short_code ON urls(short_code);
+CREATE INDEX idx_urls_user_id    ON urls(user_id);
+
+-- Rate limiting table
+CREATE TABLE rate_limits (
+    ip_address VARCHAR(45) NOT NULL,
+    endpoint   VARCHAR(100) NOT NULL,
+    hits       INT UNSIGNED NOT NULL DEFAULT 1,
+    window_start DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (ip_address, endpoint)
+) ENGINE=InnoDB;
+
+-- Seed default admin (password: admin123 - CHANGE IN PRODUCTION)
+INSERT INTO admins (username, password_hash) VALUES (
+    'admin',
+    '$argon2id$v=19$m=65536,t=4,p=1$WVJDU1FEZUFqU1B4VmFzZw$LfaWSCkGxo7Qdg7oiE2K+Y+OmaiR1helB5kXOvSvPdM'
+);

@@ -1,0 +1,135 @@
+{
+    "meta": {
+        "code": "pt-BR",
+        "name": "Português (Brasil)",
+        "flag": "🇧🇷"
+    },
+    "header": {
+        "themeToggle": "Alternar tema"
+    },
+    "hero": {
+        "title": "Encurte seus links",
+        "subtitle": "Cole uma URL longa e obtenha um link curto instantaneamente."
+    },
+    "form": {
+        "urlPlaceholder": "https://suaurl.com/muito-longa",
+        "aliasPlaceholder": "Alias personalizado (opcional)",
+        "aliasTitle": "Apenas letras, números, hífens e underscores",
+        "expiresTitle": "Expiração (opcional)",
+        "enableExpiration": "Definir expiração",
+        "shortenBtn": "Encurtar",
+        "copyBtn": "Copiar"
+    },
+    "myUrls": {
+        "title": "Meus Links",
+        "empty": "Nenhum link ainda. Encurte uma URL acima para começar!",
+        "expires": "Expira",
+        "noExpiration": "Sem expiração",
+        "clicks": "cliques",
+        "deleteBtn": "Excluir",
+        "copyBtn": "Copiar link",
+        "editBtn": "Editar",
+        "qrBtn": "QR Code",
+        "confirmDelete": "Excluir este link?",
+        "editTitle": "Editar Link",
+        "editUrlPlaceholder": "Nova URL de destino",
+        "editSave": "Salvar",
+        "editCancel": "Cancelar"
+    },
+    "auth": {
+        "loginTab": "Entrar",
+        "registerTab": "Cadastrar",
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Senha",
+        "passwordHint": "Senha (mín. 8 caracteres)",
+        "loginBtn": "Entrar",
+        "registerBtn": "Cadastrar",
+        "logoutBtn": "Sair"
+    },
+    "toast": {
+        "copied": "Copiado!",
+        "loginSuccess": "Login realizado!",
+        "registerSuccess": "Conta criada!",
+        "logoutSuccess": "Desconectado",
+        "updated": "Link atualizado!",
+        "deleted": "Link excluído",
+        "unknownError": "Erro desconhecido"
+    },
+    "footer": {
+        "terms": "Termos de Uso",
+        "donate": "Pague-me um café",
+        "copy": "© 2026 OpenShortner · Licença AGPL-3.0"
+    },
+    "errorPage": {
+        "title": "Link não encontrado",
+        "heading": "404",
+        "message": "Este link não existe ou expirou.",
+        "back": "← Voltar para o início"
+    },
+    "terms": {
+        "pageTitle": "Termos de Uso – OpenShortner",
+        "title": "Termos de Uso",
+        "s1Title": "1. Uso do Serviço",
+        "s1Text": "O OpenShortner é um serviço gratuito de encurtamento de URLs. Ao utilizar este serviço, você concorda com os termos abaixo.",
+        "s2Title": "2. Uso Proibido",
+        "s2Text": "É estritamente proibido utilizar o serviço para:",
+        "s2Items": [
+            "Distribuição de malware, phishing ou conteúdo malicioso",
+            "Links para conteúdo ilegal em qualquer jurisdição",
+            "Spam ou envio em massa não solicitado",
+            "Violação de direitos autorais ou propriedade intelectual",
+            "Qualquer atividade que viole leis locais, estaduais ou federais"
+        ],
+        "s3Title": "3. Remoção de Links",
+        "s3Text": "Reservamo-nos o direito de remover qualquer link ou bloquear qualquer conta a qualquer momento, sem aviso prévio, caso haja violação destes termos ou por qualquer outro motivo.",
+        "s4Title": "4. Isenção de Responsabilidade",
+        "s4Text1": "O OpenShortner não se responsabiliza pelo conteúdo das URLs encurtadas. O serviço é fornecido \"como está\", sem garantias de qualquer tipo, expressas ou implícitas.",
+        "s4Text2": "Não nos responsabilizamos por danos diretos, indiretos, incidentais ou consequenciais decorrentes do uso do serviço.",
+        "s5Title": "5. Armazenamento de Dados",
+        "s5Text": "Armazenamos as seguintes informações:",
+        "s5Items": [
+            "URLs original e encurtada",
+            "Email do usuário (quando cadastrado)",
+            "Contagem de cliques",
+            "Data de criação e expiração dos links",
+            "Endereço IP para fins de limitação de uso (rate limiting)"
+        ],
+        "s5Extra": "Não compartilhamos dados pessoais com terceiros.",
+        "s6Title": "6. Alterações nos Termos",
+        "s6Text": "Estes termos podem ser alterados a qualquer momento. O uso contínuo do serviço após alterações implica aceitação dos novos termos.",
+        "s7Title": "7. Contato",
+        "s7Text": "Para dúvidas ou denúncias, abra uma issue no",
+        "s7Link": "repositório GitHub"
+    },
+    "admin": {
+        "badge": "Admin",
+        "loginTitle": "Painel Admin",
+        "loginSubtitle": "Entre para gerenciar a plataforma.",
+        "usernamePlaceholder": "Nome de usuário",
+        "usersTab": "Usuários",
+        "linksTab": "Links",
+        "usersTitle": "Gerenciar Usuários",
+        "linksTitle": "Gerenciar Links",
+        "searchPlaceholder": "Buscar…",
+        "colEmail": "Email",
+        "colStatus": "Status",
+        "colCreated": "Criado em",
+        "colActions": "Ações",
+        "colOriginalUrl": "URL Original",
+        "colShortUrl": "URL Curta",
+        "colOwner": "Dono",
+        "colClicks": "Cliques",
+        "colExpires": "Expira",
+        "statusActive": "Ativo",
+        "statusBlocked": "Bloqueado",
+        "blockBtn": "Bloquear usuário",
+        "unblockBtn": "Desbloquear usuário",
+        "deleteBtn": "Excluir",
+        "confirmDeleteUser": "Excluir o usuário {email}? Isso não pode ser desfeito.",
+        "confirmDeleteUrl": "Excluir este link? Isso não pode ser desfeito.",
+        "userBlocked": "Usuário bloqueado",
+        "userActivated": "Usuário ativado",
+        "noUsers": "Nenhum usuário encontrado.",
+        "noLinks": "Nenhum link encontrado."
+    }
+}

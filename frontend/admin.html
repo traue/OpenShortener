@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin · OpenShortner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">OpenShortner</a>
+            <span class="admin-badge" data-i18n="admin.badge"></span>
+        </div>
+        <div class="header-right">
+            <div class="lang-dropdown">
+                <button id="lang-toggle" class="btn-icon" title="Language" aria-label="Language">
+                    <span id="lang-icon">🇧🇷</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div id="lang-menu" class="lang-menu hidden"></div>
+            </div>
+            <button id="theme-toggle" class="btn-icon" data-i18n-title="header.themeToggle" aria-label="Toggle theme">
+                <span id="theme-icon">🌙</span>
+            </button>
+            <div id="admin-area"></div>
+        </div>
+    </header>
+
+    <!-- Login -->
+    <section id="admin-login" class="admin-login-section">
+        <div class="admin-login-card">
+            <h1 data-i18n="admin.loginTitle"></h1>
+            <p class="subtitle" data-i18n="admin.loginSubtitle"></p>
+            <form id="admin-login-form" class="auth-form">
+                <input type="text" name="username" data-i18n-placeholder="admin.usernamePlaceholder" required autocomplete="username">
+                <input type="password" name="password" data-i18n-placeholder="auth.passwordPlaceholder" required>
+                <button type="submit" class="btn-primary" data-i18n="auth.loginBtn"></button>
+                <p id="admin-login-error" class="form-error hidden"></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="admin-dashboard" class="admin-dashboard hidden">
+        <!-- Tabs -->
+        <nav class="admin-tabs">
+            <button class="admin-tab active" data-panel="users">
+                <span class="admin-tab-icon">👥</span>
+                <span data-i18n="admin.usersTab"></span>
+                <span id="users-count" class="admin-tab-count">0</span>
+            </button>
+            <button class="admin-tab" data-panel="urls">
+                <span class="admin-tab-icon">🔗</span>
+                <span data-i18n="admin.linksTab"></span>
+                <span id="urls-count" class="admin-tab-count">0</span>
+            </button>
+        </nav>
+
+        <!-- Users Panel -->
+        <div id="panel-users" class="admin-panel">
+            <div class="admin-panel-header">
+                <h2 data-i18n="admin.usersTitle"></h2>
+                <div class="admin-search">
+                    <input type="text" id="users-search" data-i18n-placeholder="admin.searchPlaceholder">
+                </div>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th data-i18n="admin.colEmail"></th>
+                            <th data-i18n="admin.colStatus"></th>
+                            <th data-i18n="admin.colCreated"></th>
+                            <th data-i18n="admin.colActions"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody"></tbody>
+                </table>
+            </div>
+            <p id="users-empty" class="admin-empty hidden" data-i18n="admin.noUsers"></p>
+        </div>
+
+        <!-- URLs Panel -->
+        <div id="panel-urls" class="admin-panel hidden">
+            <div class="admin-panel-header">
+                <h2 data-i18n="admin.linksTitle"></h2>
+                <div class="admin-search">
+                    <input type="text" id="urls-search" data-i18n-placeholder="admin.searchPlaceholder">
+                </div>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="urls-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th data-i18n="admin.colOriginalUrl"></th>
+                            <th data-i18n="admin.colShortUrl"></th>
+                            <th data-i18n="admin.colOwner"></th>
+                            <th data-i18n="admin.colClicks"></th>
+                            <th data-i18n="admin.colExpires"></th>
+                            <th data-i18n="admin.colCreated"></th>
+                            <th data-i18n="admin.colActions"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="urls-tbody"></tbody>
+                </table>
+            </div>
+            <p id="urls-empty" class="admin-empty hidden" data-i18n="admin.noLinks"></p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-copy" data-i18n="footer.copy"></p>
+    </footer>
+
+    <script src="admin.js"></script>
+</body>
+</html>

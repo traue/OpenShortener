@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenShortner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">OpenShortner</a>
+        </div>
+        <div class="header-right">
+            <div class="lang-dropdown">
+                <button id="lang-toggle" class="btn-icon" title="Language" aria-label="Language">
+                    <span id="lang-icon">🇧🇷</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div id="lang-menu" class="lang-menu hidden"></div>
+            </div>
+            <button id="theme-toggle" class="btn-icon" data-i18n-title="header.themeToggle" aria-label="Toggle theme">
+                <span id="theme-icon">🌙</span>
+            </button>
+            <div id="auth-area"></div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+        <!-- Shorten form -->
+        <section class="shorten-section">
+            <h1 data-i18n="hero.title"></h1>
+            <p class="subtitle" data-i18n="hero.subtitle"></p>
+
+            <form id="shorten-form" class="shorten-form">
+                <div class="input-group">
+                    <input type="url" id="url-input" data-i18n-placeholder="form.urlPlaceholder" required>
+                    <button type="submit" class="btn-primary" id="shorten-btn" data-i18n="form.shortenBtn"></button>
+                </div>
+                <div class="optional-fields">
+                    <input type="text" id="alias-input" data-i18n-placeholder="form.aliasPlaceholder" data-i18n-title="form.aliasTitle" pattern="[a-zA-Z0-9_\-]+">
+                </div>
+                <div class="expiration-toggle">
+                    <label class="switch-label">
+                        <span class="switch">
+                            <input type="checkbox" id="expires-toggle">
+                            <span class="switch-slider"></span>
+                        </span>
+                        <span data-i18n="form.enableExpiration"></span>
+                    </label>
+                    <input type="datetime-local" id="expires-input" class="hidden" data-i18n-title="form.expiresTitle">
+                </div>
+            </form>
+
+            <!-- Result -->
+            <div id="result" class="result hidden">
+                <div class="result-url">
+                    <a id="short-url" href="#" target="_blank" rel="noopener"></a>
+                    <button id="copy-btn" class="btn-secondary" data-i18n="form.copyBtn"></button>
+                </div>
+                <div class="result-qr">
+                    <img id="qr-img" alt="QR Code" width="200" height="200">
+                </div>
+            </div>
+        </section>
+
+        <!-- My URLs (authenticated) -->
+        <section id="my-urls-section" class="my-urls-section hidden">
+            <h2 data-i18n="myUrls.title"></h2>
+            <div id="my-urls-list" class="urls-list"></div>
+        </section>
+    </main>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-backdrop" data-close-modal></div>
+        <div class="modal-content">
+            <button class="modal-close" data-close-modal>&times;</button>
+            <div id="auth-tabs" class="auth-tabs">
+                <button class="auth-tab active" data-tab="login" data-i18n="auth.loginTab"></button>
+                <button class="auth-tab" data-tab="register" data-i18n="auth.registerTab"></button>
+            </div>
+
+            <!-- Login -->
+            <form id="login-form" class="auth-form">
+                <input type="email" name="email" data-i18n-placeholder="auth.emailPlaceholder" required>
+                <input type="password" name="password" data-i18n-placeholder="auth.passwordPlaceholder" required minlength="8">
+                <button type="submit" class="btn-primary" data-i18n="auth.loginBtn"></button>
+                <p id="login-error" class="form-error hidden"></p>
+            </form>
+
+            <!-- Register -->
+            <form id="register-form" class="auth-form hidden">
+                <input type="email" name="email" data-i18n-placeholder="auth.emailPlaceholder" required>
+                <input type="password" name="password" data-i18n-placeholder="auth.passwordHint" required minlength="8">
+                <button type="submit" class="btn-primary" data-i18n="auth.registerBtn"></button>
+                <p id="register-error" class="form-error hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/terms.html" data-i18n="footer.terms"></a>
+            <a href="https://github.com/traue/openshortner" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <div class="donate">
+            ☕ <a href="https://buymeacoffee.com/traue" target="_blank" rel="noopener" data-i18n="footer.donate"></a>
+        </div>
+        <p class="footer-copy" data-i18n="footer.copy"></p>     
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
