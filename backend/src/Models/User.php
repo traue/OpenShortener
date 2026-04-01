@@ -34,7 +34,12 @@ final class User
 
     public static function all(): array
     {
-        return Database::pdo()->query('SELECT id, email, is_active, is_admin, created_at FROM users ORDER BY created_at DESC')->fetchAll();
+        return Database::pdo()->query(
+            'SELECT u.id, u.email, u.is_active, u.is_admin, u.created_at,
+                    (SELECT COUNT(*) FROM urls WHERE urls.user_id = u.id) AS link_count
+             FROM users u
+             ORDER BY u.created_at DESC'
+        )->fetchAll();
     }
 
     public static function delete(int $id): bool
@@ -61,5 +66,21 @@ final class User
     {
         $stmt = Database::pdo()->prepare('UPDATE users SET password_hash = :hash WHERE id = :id');
         return $stmt->execute(['hash' => $passwordHash, 'id' => $id]);
+    }
+
+    public static function updateUser(int $id, array $fields): bool
+    {
+        $sets = [];
+        $params = ['id' => $id];
+        $allowed = ['email', 'password_hash', 'is_active', 'is_admin'];
+        foreach ($fields as $col => $val) {
+            if (!in_array($col, $allowed, true)) continue;
+            $sets[] = "{$col} = :{$col}";
+            $params[$col] = $val;
+        }
+        if (empty($sets)) return false;
+        $sql = 'UPDATE users SET ' . implode(', ', $sets) . ' WHERE id = :id';
+        $stmt = Database::pdo()->prepare($sql);
+        return $stmt->execute($params);
     }
 }

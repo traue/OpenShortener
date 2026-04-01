@@ -38,8 +38,7 @@
     const shortUrlA    = $('#short-url');
     const copyBtn      = $('#copy-btn');
     const qrImg        = $('#qr-img');
-    const myUrlsSection = $('#my-urls-section');
-    const myUrlsList   = $('#my-urls-list');
+    const myUrlsLink   = $('#my-urls-link');
     const expiresToggle = $('#expires-toggle');
 
     // ── i18n ─────────────────────────────────────────────────
@@ -203,12 +202,11 @@
                 '<button class="btn-secondary btn-small" id="logout-btn">' + escapeHtml(t('auth.logoutBtn')) + '</button>';
             $('#change-pw-btn').addEventListener('click', function () { passwordModal.classList.remove('hidden'); });
             $('#logout-btn').addEventListener('click', handleLogout);
-            myUrlsSection.classList.remove('hidden');
-            loadMyUrls();
+            myUrlsLink.classList.remove('hidden');
         } else {
             authArea.innerHTML = '<button class="btn-secondary" id="login-btn">' + escapeHtml(t('auth.loginTab')) + '</button>';
             $('#login-btn').addEventListener('click', function () { authModal.classList.remove('hidden'); });
-            myUrlsSection.classList.add('hidden');
+            myUrlsLink.classList.add('hidden');
         }
     }
 
@@ -325,8 +323,6 @@
             shortUrlA.textContent = data.short_url;
             qrImg.src = 'data:image/png;base64,' + data.qr_code;
             resultDiv.classList.remove('hidden');
-
-            if (currentUser) loadMyUrls();
         } catch (err) {
             toast(err.message, 4000);
         }
@@ -337,101 +333,6 @@
         var text = shortUrlA.textContent;
         navigator.clipboard.writeText(text).then(function () { toast(t('toast.copied')); });
     });
-
-    // ── My URLs ──────────────────────────────────────────────
-    async function loadMyUrls() {
-        try {
-            var urls = await api('GET', '/my-urls');
-            renderMyUrls(urls);
-        } catch (_) {
-            // not logged in
-        }
-    }
-
-    function renderMyUrls(urls) {
-        if (!urls.length) {
-            myUrlsList.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem 0">' + escapeHtml(t('myUrls.empty')) + '</p>';
-            return;
-        }
-
-        myUrlsList.innerHTML = urls.map(function (u) {
-            var exp = u.expires_at
-                ? '<span class="badge">⏱ ' + escapeHtml(t('myUrls.expires')) + ' ' + escapeHtml(u.expires_at) + '</span>'
-                : '<span class="badge">∞ ' + escapeHtml(t('myUrls.noExpiration')) + '</span>';
-            return '<div class="url-card" data-id="' + u.id + '">' +
-                '<div class="url-card-info">' +
-                    '<a class="short" href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener">' + escapeHtml(u.short_url) + '</a>' +
-                    '<span class="original" title="' + escapeHtml(u.original_url) + '">' + escapeHtml(u.original_url) + '</span>' +
-                    '<span class="meta">' + exp + '<span class="badge">👆 ' + u.clicks + ' ' + escapeHtml(t('myUrls.clicks')) + '</span></span>' +
-                '</div>' +
-                '<div class="url-card-actions">' +
-                    '<button class="btn-icon-sm" onclick="window.__copyUrl(\'' + escapeHtml(u.short_url) + '\')" title="' + escapeHtml(t('myUrls.copyBtn')) + '">📋</button>' +
-                    '<button class="btn-icon-sm" onclick="window.__editUrl(' + u.id + ', \'' + escapeAttr(u.original_url) + '\')" title="' + escapeHtml(t('myUrls.editBtn')) + '">✏️</button>' +
-                    '<button class="btn-icon-sm" onclick="window.__showQr(\'' + escapeHtml(u.short_url) + '\')" title="' + escapeHtml(t('myUrls.qrBtn')) + '">📱</button>' +
-                    '<button class="btn-icon-sm danger" onclick="window.__deleteUrl(' + u.id + ')" title="' + escapeHtml(t('myUrls.deleteBtn')) + '">🗑️</button>' +
-                '</div>' +
-            '</div>';
-        }).join('');
-    }
-
-    // ── Copy URL ─────────────────────────────────────────────
-    window.__copyUrl = function (url) {
-        navigator.clipboard.writeText(url).then(function () { toast(t('toast.copied')); });
-    };
-
-    // ── Edit URL ─────────────────────────────────────────────
-    window.__editUrl = function (id, currentUrl) {
-        var card = document.querySelector('.url-card[data-id="' + id + '"]');
-        if (!card || card.querySelector('.edit-inline')) return;
-
-        var editDiv = document.createElement('div');
-        editDiv.className = 'edit-inline';
-        editDiv.innerHTML =
-            '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;width:100%">' +
-                '<input type="url" class="edit-url-input" value="' + escapeAttr(currentUrl) + '" placeholder="' + escapeHtml(t('myUrls.editUrlPlaceholder')) + '" style="flex:1">' +
-                '<button class="btn-primary btn-small edit-save-btn">' + escapeHtml(t('myUrls.editSave')) + '</button>' +
-                '<button class="btn-secondary btn-small edit-cancel-btn">' + escapeHtml(t('myUrls.editCancel')) + '</button>' +
-            '</div>';
-        card.appendChild(editDiv);
-
-        var input = editDiv.querySelector('.edit-url-input');
-        input.focus();
-        input.select();
-
-        editDiv.querySelector('.edit-save-btn').addEventListener('click', async function () {
-            var newUrl = input.value.trim();
-            if (!newUrl) return;
-            try {
-                await api('PUT', '/urls/' + id, { url: newUrl });
-                toast(t('toast.updated'));
-                loadMyUrls();
-            } catch (err) {
-                toast(err.message, 4000);
-            }
-        });
-
-        editDiv.querySelector('.edit-cancel-btn').addEventListener('click', function () {
-            editDiv.remove();
-        });
-    };
-
-    // ── Show QR ──────────────────────────────────────────────
-    window.__showQr = function (shortUrl) {
-        var code = shortUrl.split('/').pop();
-        window.open('/qr/' + code, '_blank');
-    };
-
-    // ── Delete URL ───────────────────────────────────────────
-    window.__deleteUrl = async function (id) {
-        if (!confirm(t('myUrls.confirmDelete'))) return;
-        try {
-            await api('DELETE', '/urls/' + id);
-            toast(t('toast.deleted'));
-            loadMyUrls();
-        } catch (err) {
-            toast(err.message, 4000);
-        }
-    };
 
     // ── Escape HTML helper ───────────────────────────────────
     function escapeHtml(str) {

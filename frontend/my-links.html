@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="myLinks.pageTitle">My Links · OpenShortner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">OpenShortner</a>
+        </div>
+        <div class="header-right">
+            <div class="lang-dropdown">
+                <button id="lang-toggle" class="btn-icon" title="Language" aria-label="Language">
+                    <span id="lang-icon">🇧🇷</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div id="lang-menu" class="lang-menu hidden"></div>
+            </div>
+            <button id="theme-toggle" class="btn-icon" data-i18n-title="header.themeToggle" aria-label="Toggle theme">
+                <span id="theme-icon">🌙</span>
+            </button>
+            <div id="auth-area"></div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="mylinks-main">
+        <!-- Not logged in message -->
+        <section id="not-logged-in" class="mylinks-empty-section hidden">
+            <p data-i18n="myLinks.loginRequired"></p>
+            <a href="/" class="btn-primary" data-i18n="myLinks.backHome"></a>
+        </section>
+
+        <!-- My Links -->
+        <section id="mylinks-section" class="mylinks-section hidden">
+            <div class="mylinks-header">
+                <h1 data-i18n="myUrls.title"></h1>
+                <div class="mylinks-search">
+                    <input type="text" id="links-search" data-i18n-placeholder="admin.searchPlaceholder">
+                </div>
+            </div>
+            <div id="mylinks-list" class="urls-list"></div>
+        </section>
+
+        <!-- Stats Modal -->
+        <div id="stats-modal" class="modal hidden">
+            <div class="modal-backdrop" data-close-stats></div>
+            <div class="modal-content modal-wide">
+                <button class="modal-close" data-close-stats>&times;</button>
+                <h2 id="stats-title" data-i18n="myLinks.statsTitle"></h2>
+                <div id="stats-body" class="stats-body">
+                    <p class="stats-total"><span data-i18n="myLinks.totalClicks"></span>: <strong id="stats-total-count">0</strong></p>
+                    <div class="stats-chart-wrap">
+                        <h3 data-i18n="myLinks.clicksLast30"></h3>
+                        <div id="stats-chart" class="stats-chart"></div>
+                    </div>
+                    <div class="stats-referers-wrap">
+                        <h3 data-i18n="myLinks.topReferers"></h3>
+                        <ul id="stats-referers" class="stats-referers"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Change Password Modal -->
+    <div id="password-modal" class="modal hidden">
+        <div class="modal-backdrop" data-close-password></div>
+        <div class="modal-content">
+            <button class="modal-close" data-close-password>&times;</button>
+            <h2 data-i18n="auth.changePasswordTitle" style="margin-bottom:1.25rem"></h2>
+            <form id="password-form" class="auth-form">
+                <input type="password" name="current_password" data-i18n-placeholder="auth.currentPasswordPlaceholder" required minlength="8">
+                <input type="password" name="new_password" data-i18n-placeholder="auth.newPasswordPlaceholder" required minlength="8">
+                <input type="password" name="confirm_password" data-i18n-placeholder="auth.confirmPasswordPlaceholder" required minlength="8">
+                <button type="submit" class="btn-primary" data-i18n="auth.changePasswordBtn"></button>
+                <p id="password-error" class="form-error hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/terms.html" data-i18n="footer.terms"></a>
+            <a href="https://github.com/traue/openshortner" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <div class="donate">
+            ☕ <a href="https://buymeacoffee.com/traue" target="_blank" rel="noopener" data-i18n="footer.donate"></a>
+        </div>
+        <p class="footer-copy" data-i18n="footer.copy"></p>
+    </footer>
+
+    <script src="my-links.js"></script>
+</body>
+</html>

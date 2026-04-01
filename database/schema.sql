@@ -28,6 +28,20 @@ CREATE TABLE urls (
 CREATE INDEX idx_urls_short_code ON urls(short_code);
 CREATE INDEX idx_urls_user_id    ON urls(user_id);
 
+-- Click analytics table
+CREATE TABLE click_logs (
+    id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    url_id      BIGINT UNSIGNED NOT NULL,
+    clicked_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ip_address  VARCHAR(45)     NULL,
+    referer     TEXT            NULL,
+    user_agent  TEXT            NULL,
+    CONSTRAINT fk_clicks_url FOREIGN KEY (url_id) REFERENCES urls(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_click_logs_url_id    ON click_logs(url_id);
+CREATE INDEX idx_click_logs_clicked   ON click_logs(url_id, clicked_at);
+
 -- Rate limiting table
 CREATE TABLE rate_limits (
     ip_address VARCHAR(45) NOT NULL,

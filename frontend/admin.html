@@ -62,8 +62,11 @@
         <div id="panel-users" class="admin-panel">
             <div class="admin-panel-header">
                 <h2 data-i18n="admin.usersTitle"></h2>
-                <div class="admin-search">
-                    <input type="text" id="users-search" data-i18n-placeholder="admin.searchPlaceholder">
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                    <div class="admin-search">
+                        <input type="text" id="users-search" data-i18n-placeholder="admin.searchPlaceholder">
+                    </div>
+                    <button class="btn-primary btn-small" id="btn-create-user" data-i18n="admin.createUserBtn"></button>
                 </div>
             </div>
             <div class="admin-table-wrap">
@@ -73,6 +76,7 @@
                             <th>ID</th>
                             <th data-i18n="admin.colEmail"></th>
                             <th data-i18n="admin.colStatus"></th>
+                            <th data-i18n="admin.colLinks"></th>
                             <th data-i18n="admin.colCreated"></th>
                             <th data-i18n="admin.colActions"></th>
                         </tr>
@@ -87,8 +91,11 @@
         <div id="panel-urls" class="admin-panel hidden">
             <div class="admin-panel-header">
                 <h2 data-i18n="admin.linksTitle"></h2>
-                <div class="admin-search">
-                    <input type="text" id="urls-search" data-i18n-placeholder="admin.searchPlaceholder">
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                    <div class="admin-search">
+                        <input type="text" id="urls-search" data-i18n-placeholder="admin.searchPlaceholder">
+                    </div>
+                    <button class="btn-primary btn-small" id="btn-create-url" data-i18n="admin.createUrlBtn"></button>
                 </div>
             </div>
             <div class="admin-table-wrap">
@@ -111,6 +118,67 @@
             <p id="urls-empty" class="admin-empty hidden" data-i18n="admin.noLinks"></p>
         </div>
     </section>
+
+    <!-- Create/Edit User Modal -->
+    <div id="user-modal" class="modal hidden">
+        <div class="modal-backdrop" data-close-user-modal></div>
+        <div class="modal-content">
+            <button class="modal-close" data-close-user-modal>&times;</button>
+            <h2 id="user-modal-title" data-i18n="admin.createUserTitle"></h2>
+            <form id="user-modal-form" class="auth-form" style="margin-top:1rem">
+                <input type="hidden" id="user-modal-id" value="">
+                <input type="email" id="user-modal-email" data-i18n-placeholder="auth.emailPlaceholder" required>
+                <input type="password" id="user-modal-password" data-i18n-placeholder="auth.passwordPlaceholder" minlength="8">
+                <p id="user-modal-pw-hint" class="form-hint" data-i18n="admin.editPasswordHint"></p>
+                <label class="switch-label" style="margin-top:0.25rem">
+                    <span class="switch">
+                        <input type="checkbox" id="user-modal-admin">
+                        <span class="switch-slider"></span>
+                    </span>
+                    <span data-i18n="admin.isAdminLabel"></span>
+                </label>
+                <button type="submit" class="btn-primary" id="user-modal-submit" data-i18n="admin.createUserBtn"></button>
+                <p id="user-modal-error" class="form-error hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create/Edit URL Modal -->
+    <div id="url-modal" class="modal hidden">
+        <div class="modal-backdrop" data-close-url-modal></div>
+        <div class="modal-content">
+            <button class="modal-close" data-close-url-modal>&times;</button>
+            <h2 id="url-modal-title" data-i18n="admin.createUrlTitle"></h2>
+            <form id="url-modal-form" class="auth-form" style="margin-top:1rem">
+                <input type="hidden" id="url-modal-id" value="">
+                <input type="url" id="url-modal-url" data-i18n-placeholder="form.urlPlaceholder" required>
+                <input type="text" id="url-modal-alias" data-i18n-placeholder="form.aliasPlaceholder" pattern="[a-zA-Z0-9_\-]+">
+                <input type="datetime-local" id="url-modal-expires" data-i18n-title="form.expiresTitle">
+                <button type="submit" class="btn-primary" id="url-modal-submit" data-i18n="admin.createUrlBtn"></button>
+                <p id="url-modal-error" class="form-error hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- URL Stats Modal -->
+    <div id="stats-modal" class="modal hidden">
+        <div class="modal-backdrop" data-close-stats></div>
+        <div class="modal-content modal-wide">
+            <button class="modal-close" data-close-stats>&times;</button>
+            <h2 data-i18n="myLinks.statsTitle"></h2>
+            <div id="stats-body" class="stats-body">
+                <p class="stats-total"><span data-i18n="myLinks.totalClicks"></span>: <strong id="stats-total-count">0</strong></p>
+                <div class="stats-chart-wrap">
+                    <h3 data-i18n="myLinks.clicksLast30"></h3>
+                    <div id="stats-chart" class="stats-chart"></div>
+                </div>
+                <div class="stats-referers-wrap">
+                    <h3 data-i18n="myLinks.topReferers"></h3>
+                    <ul id="stats-referers" class="stats-referers"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">

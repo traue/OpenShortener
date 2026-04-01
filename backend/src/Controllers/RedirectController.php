@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Response;
+use App\Models\ClickLog;
 use App\Models\Url;
 use App\Services\QrCodeService;
 use App\Services\UrlService;
@@ -18,12 +19,17 @@ final class RedirectController
         $url = UrlService::resolve($code);
 
         if (!$url) {
-            // Return an HTML error page for expired/not found links
             http_response_code(404);
             header('Content-Type: text/html; charset=utf-8');
             echo $this->expiredPage();
             exit;
         }
+
+        // Log click details
+        $ip = $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
+        $referer = $_SERVER['HTTP_REFERER'] ?? null;
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? null;
+        ClickLog::create((int) $url['id'], $ip, $referer, $ua);
 
         Response::redirect($url['original_url'], 302);
     }

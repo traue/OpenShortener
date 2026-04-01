@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
+use App\Models\ClickLog;
 use App\Models\Url;
 use App\Services\QrCodeService;
 use App\Services\UrlService;
@@ -108,5 +109,26 @@ final class UrlController
 
         Url::delete($id);
         Response::json(['message' => 'Deleted']);
+    }
+
+    public function stats(array $params): void
+    {
+        $id = (int) ($params['id'] ?? 0);
+        $userId = Session::get('user_id');
+
+        $url = Url::findById($id);
+        if (!$url || (int) $url['user_id'] !== $userId) {
+            Response::error('Not found', 404);
+        }
+
+        $clicksByDay = ClickLog::clicksByDay($id, 30);
+        $topReferers = ClickLog::topReferers($id, 10);
+        $totalClicks = (int) $url['clicks'];
+
+        Response::json([
+            'total_clicks'  => $totalClicks,
+            'clicks_by_day' => $clicksByDay,
+            'top_referers'  => $topReferers,
+        ]);
     }
 }
