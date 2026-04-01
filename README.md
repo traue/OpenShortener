@@ -47,9 +47,11 @@ openshortner/
 │       └── Services/          # Auth, Url, QrCode, Base62
 ├── frontend/
 │   ├── index.html
+│   ├── admin.html
 │   ├── termos.html
 │   ├── styles.css
 │   ├── app.js
+│   ├── admin.js
 │   └── i18n/
 │       ├── en.json
 │       └── pt-BR.json
