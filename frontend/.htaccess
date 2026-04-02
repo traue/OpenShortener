@@ -22,10 +22,13 @@
     # Rotear chamadas API para o backend
     RewriteRule ^api/(.*)$ /api/index.php [L,QSA]
 
-    # Short codes (5-12 caracteres alfanuméricos, _ ou -)
+    # QR codes → backend
+    RewriteRule ^qr/([a-zA-Z0-9_-]+)$ /api/index.php [L,QSA]
+
+    # Short codes (alfanuméricos, _ ou -) → backend
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^([a-zA-Z0-9_-]{5,12})$ /api/index.php?code=$1 [L,QSA]
+    RewriteRule ^([a-zA-Z0-9_-]+)$ /api/index.php [L,QSA]
 </IfModule>
 
 # Bloquear acesso a arquivos sensíveis (exceto i18n/*.json)

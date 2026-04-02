@@ -8,6 +8,12 @@ use App\Models\Url;
 
 final class UrlService
 {
+    private const RESERVED_ALIASES = [
+        'api', 'admin', 'my-links', 'terms', 'qr',
+        'assets', 'i18n', 'index', 'robots', 'sitemap',
+        'favicon', 'login', 'register', 'logout',
+    ];
+
     public static function shorten(string $originalUrl, ?string $alias, ?string $expiresAt, ?int $userId): array
     {
         $cfg = require __DIR__ . '/../../config/app.php';
@@ -21,6 +27,9 @@ final class UrlService
         if ($alias !== null && $alias !== '') {
             if (!preg_match('/^[a-zA-Z0-9_\-]+$/', $alias)) {
                 throw new \InvalidArgumentException('Alias must contain only letters, numbers, hyphens and underscores');
+            }
+            if (in_array(strtolower($alias), self::RESERVED_ALIASES, true)) {
+                throw new \InvalidArgumentException('This alias is a reserved word and cannot be used');
             }
             if (Url::codeExists($alias)) {
                 throw new \InvalidArgumentException('Alias already in use');
