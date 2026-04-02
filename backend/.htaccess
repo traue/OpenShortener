@@ -1,0 +1,23 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /api/
+
+    # Redirecionar todas as requisições para index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# Proteger arquivo .env
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Headers CORS
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "https://short.opensource.dev.br"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, X-CSRF-Token"
+    Header set Access-Control-Allow-Credentials "true"
+</IfModule>

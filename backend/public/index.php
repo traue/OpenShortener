@@ -2,7 +2,20 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// ── Auto-detect paths (development vs production) ─────────────
+$vendorPath = file_exists(__DIR__ . '/../vendor/autoload.php') 
+    ? __DIR__ . '/../vendor/autoload.php'   // Development (backend/public/)
+    : __DIR__ . '/vendor/autoload.php';      // Production (api/)
+
+$envPath = file_exists(__DIR__ . '/../.env')
+    ? __DIR__ . '/../.env'                   // Development
+    : __DIR__ . '/.env';                     // Production
+
+$configPath = file_exists(__DIR__ . '/../config/app.php')
+    ? __DIR__ . '/../config/app.php'         // Development
+    : __DIR__ . '/config/app.php';           // Production
+
+require_once $vendorPath;
 
 use App\Core\Database;
 use App\Core\Env;
@@ -15,10 +28,10 @@ ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 
 // ── Environment ────────────────────────────────────────────────
-Env::load(__DIR__ . '/../.env');
+Env::load($envPath);
 
 // ── Config ─────────────────────────────────────────────────────
-$appConfig = require __DIR__ . '/../config/app.php';
+$appConfig = require $configPath;
 
 // ── CORS ───────────────────────────────────────────────────────
 $origin = $appConfig['cors_origin'];
@@ -48,7 +61,12 @@ Session::start($appConfig['session_name']);
 
 // ── Routing ────────────────────────────────────────────────────
 $router = new Router();
-require __DIR__ . '/../routes/api.php';
+
+$routesPath = file_exists(__DIR__ . '/../routes/api.php')
+    ? __DIR__ . '/../routes/api.php'         // Development
+    : __DIR__ . '/routes/api.php';           // Production
+
+require $routesPath;
 
 $method = $_SERVER['REQUEST_METHOD'];
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

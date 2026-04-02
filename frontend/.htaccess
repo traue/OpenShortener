@@ -1,0 +1,41 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Forçar HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Servir arquivos estáticos diretamente
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Servir pastas diretamente
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Rotas estáticas (HTML sem extensão)
+    RewriteRule ^my-links$ /my-links.html [L]
+    RewriteRule ^admin$ /admin.html [L]
+    RewriteRule ^terms$ /terms.html [L]
+
+    # Rotear chamadas API para o backend
+    RewriteRule ^api/(.*)$ /api/index.php [L,QSA]
+
+    # Short codes (5-12 caracteres alfanuméricos, _ ou -)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^([a-zA-Z0-9_-]{5,12})$ /api/index.php?code=$1 [L,QSA]
+</IfModule>
+
+# Bloquear acesso a arquivos sensíveis (exceto i18n/*.json)
+<FilesMatch "\.(env|md|log)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Proteger composer.json e package.json
+<FilesMatch "^(composer|package)\.json$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
