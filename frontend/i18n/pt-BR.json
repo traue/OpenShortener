@@ -66,7 +66,7 @@
     "footer": {
         "terms": "Termos de Uso",
         "donate": "Pague-me um café",
-        "copy": "© 2026 OpenShortner · Licença AGPL-3.0"
+        "copy": "© 2026 OpenShortener · Licença AGPL-3.0"
     },
     "errorPage": {
         "title": "Link não encontrado",
@@ -75,10 +75,10 @@
         "back": "← Voltar para o início"
     },
     "terms": {
-        "pageTitle": "Termos de Uso – OpenShortner",
+        "pageTitle": "Termos de Uso – OpenShortener",
         "title": "Termos de Uso",
         "s1Title": "1. Uso do Serviço",
-        "s1Text": "O OpenShortner é um serviço gratuito de encurtamento de URLs. Ao utilizar este serviço, você concorda com os termos abaixo.",
+        "s1Text": "O OpenShortener é um serviço gratuito de encurtamento de URLs. Ao utilizar este serviço, você concorda com os termos abaixo.",
         "s2Title": "2. Uso Proibido",
         "s2Text": "É estritamente proibido utilizar o serviço para:",
         "s2Items": [
@@ -91,7 +91,7 @@
         "s3Title": "3. Remoção de Links",
         "s3Text": "Reservamo-nos o direito de remover qualquer link ou bloquear qualquer conta a qualquer momento, sem aviso prévio, caso haja violação destes termos ou por qualquer outro motivo.",
         "s4Title": "4. Isenção de Responsabilidade",
-        "s4Text1": "O OpenShortner não se responsabiliza pelo conteúdo das URLs encurtadas. O serviço é fornecido \"como está\", sem garantias de qualquer tipo, expressas ou implícitas.",
+        "s4Text1": "O OpenShortener não se responsabiliza pelo conteúdo das URLs encurtadas. O serviço é fornecido \"como está\", sem garantias de qualquer tipo, expressas ou implícitas.",
         "s4Text2": "Não nos responsabilizamos por danos diretos, indiretos, incidentais ou consequenciais decorrentes do uso do serviço.",
         "s5Title": "5. Armazenamento de Dados",
         "s5Text": "Armazenamos as seguintes informações:",
@@ -159,7 +159,7 @@
         "urlUpdated": "Link atualizado!"
     },
     "myLinks": {
-        "pageTitle": "Meus Links · OpenShortner",
+        "pageTitle": "Meus Links · OpenShortener",
         "viewAll": "Ver todos os meus links",
         "loginRequired": "Você precisa entrar para ver seus links.",
         "backHome": "Voltar ao início",

@@ -66,7 +66,7 @@
     "footer": {
         "terms": "Terms of Use",
         "donate": "Buy me a coffee",
-        "copy": "© 2026 OpenShortner · AGPL-3.0 license"
+        "copy": "© 2026 OpenShortener · AGPL-3.0 license"
     },
     "errorPage": {
         "title": "Link not found",
@@ -75,10 +75,10 @@
         "back": "← Back to home"
     },
     "terms": {
-        "pageTitle": "Terms of Use – OpenShortner",
+        "pageTitle": "Terms of Use – OpenShortener",
         "title": "Terms of Use",
         "s1Title": "1. Use of Service",
-        "s1Text": "OpenShortner is a free URL shortening service. By using this service, you agree to the terms below.",
+        "s1Text": "OpenShortener is a free URL shortening service. By using this service, you agree to the terms below.",
         "s2Title": "2. Prohibited Use",
         "s2Text": "It is strictly prohibited to use the service for:",
         "s2Items": [
@@ -91,7 +91,7 @@
         "s3Title": "3. Link Removal",
         "s3Text": "We reserve the right to remove any link or block any account at any time, without prior notice, in case of violation of these terms or for any other reason.",
         "s4Title": "4. Disclaimer",
-        "s4Text1": "OpenShortner is not responsible for the content of shortened URLs. The service is provided \"as is\", without warranties of any kind, express or implied.",
+        "s4Text1": "OpenShortener is not responsible for the content of shortened URLs. The service is provided \"as is\", without warranties of any kind, express or implied.",
         "s4Text2": "We are not responsible for direct, indirect, incidental or consequential damages arising from the use of the service.",
         "s5Title": "5. Data Storage",
         "s5Text": "We store the following information:",
@@ -159,7 +159,7 @@
         "urlUpdated": "Link updated!"
     },
     "myLinks": {
-        "pageTitle": "My Links · OpenShortner",
+        "pageTitle": "My Links · OpenShortener",
         "viewAll": "View all my links",
         "loginRequired": "You need to sign in to view your links.",
         "backHome": "Back to home",

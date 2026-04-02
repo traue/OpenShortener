@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS openshortner
+CREATE DATABASE IF NOT EXISTS openshortener
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE openshortner;
+USE openshortener;
 
 CREATE TABLE users (
     id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

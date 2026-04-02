@@ -1,4 +1,4 @@
-# OpenShortner
+# OpenShortener
 
 Open-source URL shortener with QR code generation, user system, and admin panel.
 
@@ -28,7 +28,7 @@ Open-source URL shortener with QR code generation, user system, and admin panel.
 ## Project Structure
 
 ```
-openshortner/
+openshortener/
 ├── backend/
 │   ├── .env.example          # Environment variables template
 │   ├── composer.json
@@ -75,8 +75,8 @@ openshortner/
 ### Start the project
 
 ```bash
-git clone https://github.com/thiagotraue/openshortner.git
-cd openshortner
+git clone https://github.com/thiagotraue/openshortener.git
+cd openshortener
 
 # Start all services (database, backend, frontend)
 docker compose up --build -d
@@ -113,7 +113,7 @@ Install MariaDB 11+ and run:
 mysql -u root -p < database/schema.sql
 ```
 
-This creates the `openshortner` database, all tables, and the default admin.
+This creates the `openshortener` database, all tables, and the default admin.
 
 ### 2. Backend
 
@@ -154,7 +154,7 @@ php -S localhost:8080 -t frontend
 |----------------|-----------------------------------|--------------------------------------|
 | `DB_HOST`      | MariaDB host                      | `127.0.0.1`                         |
 | `DB_PORT`      | MariaDB port                      | `3306`                              |
-| `DB_NAME`      | Database name                     | `openshortner`                      |
+| `DB_NAME`      | Database name                     | `openshortener`                      |
 | `DB_USER`      | Database user                     | `root`                              |
 | `DB_PASS`      | Database password                 | *(empty)*                           |
 | `APP_BASE_URL` | Base URL for short links          | `https://short.opensource.dev.br`   |

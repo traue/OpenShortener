@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="terms.pageTitle">Termos de Uso – OpenShortner</title>
+    <title data-i18n="terms.pageTitle">Termos de Uso – OpenShortener</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         .terms { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem; }
@@ -16,7 +16,7 @@
 <body>
     <header class="header">
         <div class="header-left">
-            <a href="/" class="logo">OpenShortner</a>
+            <a href="/" class="logo">OpenShortener</a>
         </div>
         <div class="header-right">
             <button id="lang-toggle" class="btn-icon" title="Language" aria-label="Language">
@@ -72,7 +72,7 @@
                 tm.s5Items.forEach(function (i) { html += '<li>' + esc(i) + '</li>'; });
                 html += '</ul><p>' + esc(tm.s5Extra) + '</p>';
                 html += '<h2>' + esc(tm.s6Title) + '</h2><p>' + esc(tm.s6Text) + '</p>';
-                html += '<h2>' + esc(tm.s7Title) + '</h2><p>' + esc(tm.s7Text) + ' <a href="https://github.com/thiagotraue/openshortner" target="_blank" rel="noopener">' + esc(tm.s7Link) + '</a>.</p>';
+                html += '<h2>' + esc(tm.s7Title) + '</h2><p>' + esc(tm.s7Text) + ' <a href="https://github.com/thiagotraue/openshortener" target="_blank" rel="noopener">' + esc(tm.s7Link) + '</a>.</p>';
 
                 document.getElementById('terms-content').innerHTML = html;
 

@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: rootpass
-      MARIADB_DATABASE: openshortner
+      MARIADB_DATABASE: openshortener
     ports:
       - "3306:3306"
     volumes:
@@ -27,7 +27,7 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "3306"
-      DB_NAME: openshortner
+      DB_NAME: openshortener
       DB_USER: root
       DB_PASS: rootpass
       APP_BASE_URL: http://localhost:8080

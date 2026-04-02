@@ -1,6 +1,6 @@
 {
-    "name": "openshortner/backend",
-    "description": "OpenShortner - URL Shortener API",
+    "name": "openshortener/backend",
+    "description": "OpenShortener - URL Shortener API",
     "type": "project",
     "license": "AGPL-3.0-or-later",
     "require": {
