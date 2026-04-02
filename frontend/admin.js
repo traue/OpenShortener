@@ -292,8 +292,10 @@
             var toggleIcon = isActive ? '🚫' : '✅';
             var adminBadge = isAdmin ? ' <span class="status-badge status-admin">Admin</span>' : '';
             var selfLabel = isSelf ? ' <span style="color:var(--text-secondary);font-size:0.75rem">(' + escapeHtml(t('admin.youLabel')) + ')</span>' : '';
+            var linkCount = u.link_count !== undefined ? u.link_count : '—';
 
-            var actions = '<button class="btn-icon-sm" onclick="window.__viewUserLinks(' + u.id + ', \'' + escapeHtml(u.email).replace(/'/g, "\\'") + '\')" title="' + escapeHtml(t('admin.viewLinksBtn')) + '">🔗</button>';
+            var actions = '<button class="btn-icon-sm" onclick="window.__editUserModal(' + u.id + ')" title="' + escapeHtml(t('admin.editBtn')) + '">✏️</button>';
+            actions += '<button class="btn-icon-sm" onclick="window.__viewUserLinks(' + u.id + ', \'' + escapeHtml(u.email).replace(/'/g, "\\'") + '\')" title="' + escapeHtml(t('admin.viewLinksBtn')) + '">🔗</button>';
             if (!isSelf) {
                 actions += '<button class="btn-icon-sm" onclick="window.__toggleUser(' + u.id + ', ' + (isActive ? 'false' : 'true') + ')" title="' + escapeHtml(toggleLabel) + '">' + toggleIcon + '</button>';
                 actions += '<button class="btn-icon-sm danger" onclick="window.__deleteUser(' + u.id + ', \'' + escapeHtml(u.email).replace(/'/g, "\\'") + '\')" title="' + escapeHtml(t('admin.deleteBtn')) + '">🗑️</button>';
@@ -303,6 +305,7 @@
                 '<td class="col-id">' + u.id + '</td>' +
                 '<td>' + escapeHtml(u.email) + adminBadge + selfLabel + '</td>' +
                 '<td><span class="status-badge ' + statusClass + '">' + escapeHtml(statusText) + '</span></td>' +
+                '<td class="col-clicks">' + linkCount + '</td>' +
                 '<td class="col-date">' + formatDate(u.created_at) + '</td>' +
                 '<td class="col-actions">' + actions + '</td>' +
             '</tr>';
@@ -335,6 +338,8 @@
                 '<td class="col-date">' + exp + '</td>' +
                 '<td class="col-date">' + formatDate(u.created_at) + '</td>' +
                 '<td class="col-actions">' +
+                    '<button class="btn-icon-sm" onclick="window.__editUrlModal(' + u.id + ')" title="' + escapeHtml(t('admin.editBtn')) + '">✏️</button>' +
+                    '<button class="btn-icon-sm" onclick="window.__showAdminStats(' + u.id + ')" title="' + escapeHtml(t('admin.statsBtn')) + '">📊</button>' +
                     '<button class="btn-icon-sm" onclick="window.__copyAdminUrl(\'' + escapeHtml(u.short_url) + '\')" title="' + escapeHtml(t('myUrls.copyBtn')) + '">📋</button>' +
                     '<button class="btn-icon-sm danger" onclick="window.__deleteAdminUrl(' + u.id + ')" title="' + escapeHtml(t('admin.deleteBtn')) + '">🗑️</button>' +
                 '</td>' +
@@ -400,6 +405,210 @@
             $('#panel-' + panel).classList.remove('hidden');
         });
     });
+
+    // ── User Modal ─────────────────────────────────────────────
+    var userModal     = $('#user-modal');
+    var userModalForm = $('#user-modal-form');
+    var userModalId   = $('#user-modal-id');
+    var userModalEmail    = $('#user-modal-email');
+    var userModalPassword = $('#user-modal-password');
+    var userModalAdmin    = $('#user-modal-admin');
+    var userModalTitle    = $('#user-modal-title');
+    var userModalSubmit   = $('#user-modal-submit');
+    var userModalPwHint   = $('#user-modal-pw-hint');
+    var userModalError    = $('#user-modal-error');
+
+    $('#btn-create-user').addEventListener('click', function () {
+        userModalId.value = '';
+        userModalEmail.value = '';
+        userModalPassword.value = '';
+        userModalAdmin.checked = false;
+        userModalTitle.textContent = t('admin.createUserTitle');
+        userModalSubmit.textContent = t('admin.createUserBtn');
+        userModalPwHint.classList.add('hidden');
+        userModalPassword.required = true;
+        userModalError.classList.add('hidden');
+        userModal.classList.remove('hidden');
+    });
+
+    window.__editUserModal = function (id) {
+        var user = usersData.find(function (u) { return Number(u.id) === id; });
+        if (!user) return;
+        userModalId.value = user.id;
+        userModalEmail.value = user.email;
+        userModalPassword.value = '';
+        userModalAdmin.checked = Number(user.is_admin) === 1;
+        userModalTitle.textContent = t('admin.editUserTitle');
+        userModalSubmit.textContent = t('admin.saveBtn');
+        userModalPwHint.classList.remove('hidden');
+        userModalPassword.required = false;
+        userModalError.classList.add('hidden');
+        userModal.classList.remove('hidden');
+    };
+
+    function closeUserModal() {
+        userModal.classList.add('hidden');
+        userModalForm.reset();
+        userModalError.classList.add('hidden');
+    }
+
+    $$('[data-close-user-modal]').forEach(function (el) {
+        el.addEventListener('click', closeUserModal);
+    });
+
+    userModalForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        userModalError.classList.add('hidden');
+        var id = userModalId.value;
+        var email = userModalEmail.value.trim();
+        var password = userModalPassword.value;
+        var isAdmin = userModalAdmin.checked;
+
+        try {
+            if (id) {
+                // Edit
+                var body = { email: email, is_admin: isAdmin };
+                if (password) body.password = password;
+                await api('PUT', '/admin/users/' + id, body);
+                toast(t('admin.userUpdated'));
+            } else {
+                // Create
+                await api('POST', '/admin/users', { email: email, password: password, is_admin: isAdmin });
+                toast(t('admin.userCreated'));
+            }
+            closeUserModal();
+            loadUsers();
+        } catch (err) {
+            userModalError.textContent = err.message;
+            userModalError.classList.remove('hidden');
+        }
+    });
+
+    // ── URL Modal ────────────────────────────────────────────
+    var urlModal     = $('#url-modal');
+    var urlModalForm = $('#url-modal-form');
+    var urlModalId   = $('#url-modal-id');
+    var urlModalUrl      = $('#url-modal-url');
+    var urlModalAlias    = $('#url-modal-alias');
+    var urlModalExpires  = $('#url-modal-expires');
+    var urlModalTitle    = $('#url-modal-title');
+    var urlModalSubmit   = $('#url-modal-submit');
+    var urlModalError    = $('#url-modal-error');
+
+    $('#btn-create-url').addEventListener('click', function () {
+        urlModalId.value = '';
+        urlModalUrl.value = '';
+        urlModalAlias.value = '';
+        urlModalExpires.value = '';
+        urlModalAlias.disabled = false;
+        urlModalTitle.textContent = t('admin.createUrlTitle');
+        urlModalSubmit.textContent = t('admin.createUrlBtn');
+        urlModalError.classList.add('hidden');
+        urlModal.classList.remove('hidden');
+    });
+
+    window.__editUrlModal = function (id) {
+        var url = urlsData.find(function (u) { return Number(u.id) === id; });
+        if (!url) return;
+        urlModalId.value = url.id;
+        urlModalUrl.value = url.original_url;
+        urlModalAlias.value = url.short_code;
+        urlModalAlias.disabled = false;
+        urlModalExpires.value = url.expires_at ? url.expires_at.replace(' ', 'T').substring(0, 16) : '';
+        urlModalTitle.textContent = t('admin.editUrlTitle');
+        urlModalSubmit.textContent = t('admin.saveBtn');
+        urlModalError.classList.add('hidden');
+        urlModal.classList.remove('hidden');
+    };
+
+    function closeUrlModal() {
+        urlModal.classList.add('hidden');
+        urlModalForm.reset();
+        urlModalError.classList.add('hidden');
+    }
+
+    $$('[data-close-url-modal]').forEach(function (el) {
+        el.addEventListener('click', closeUrlModal);
+    });
+
+    urlModalForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        urlModalError.classList.add('hidden');
+        var id = urlModalId.value;
+        var url = urlModalUrl.value.trim();
+        var alias = urlModalAlias.value.trim();
+        var expires = urlModalExpires.value;
+
+        try {
+            if (id) {
+                // Edit
+                var body = { url: url };
+                if (alias) body.alias = alias;
+                body.expires_at = expires || null;
+                await api('PUT', '/admin/urls/' + id, body);
+                toast(t('admin.urlUpdated'));
+            } else {
+                // Create
+                var body = { url: url };
+                if (alias) body.alias = alias;
+                if (expires) body.expires_at = expires;
+                await api('POST', '/admin/urls', body);
+                toast(t('admin.urlCreated'));
+            }
+            closeUrlModal();
+            loadUrls();
+        } catch (err) {
+            urlModalError.textContent = err.message;
+            urlModalError.classList.remove('hidden');
+        }
+    });
+
+    // ── Stats Modal ──────────────────────────────────────────
+    var statsModal = $('#stats-modal');
+
+    window.__showAdminStats = async function (id) {
+        try {
+            var data = await api('GET', '/admin/urls/' + id + '/stats');
+            renderAdminStats(data);
+            statsModal.classList.remove('hidden');
+        } catch (err) {
+            toast(err.message, 4000);
+        }
+    };
+
+    $$('[data-close-stats]').forEach(function (el) {
+        el.addEventListener('click', function () { statsModal.classList.add('hidden'); });
+    });
+
+    function renderAdminStats(data) {
+        $('#stats-total-count').textContent = data.total_clicks;
+
+        // Bar chart
+        var chart = $('#stats-chart');
+        if (!data.clicks_by_day || !data.clicks_by_day.length) {
+            chart.innerHTML = '<p style="color:var(--text-secondary);padding:1rem 0">' + escapeHtml(t('myLinks.noData')) + '</p>';
+        } else {
+            var maxCount = Math.max.apply(null, data.clicks_by_day.map(function (d) { return d.count; }));
+            chart.innerHTML = data.clicks_by_day.map(function (d) {
+                var pct = maxCount > 0 ? Math.round((d.count / maxCount) * 100) : 0;
+                return '<div class="stats-bar-row">' +
+                    '<span class="stats-bar-label">' + escapeHtml(d.day) + '</span>' +
+                    '<div class="stats-bar-track"><div class="stats-bar-fill" style="width:' + pct + '%"></div></div>' +
+                    '<span class="stats-bar-count">' + d.count + '</span>' +
+                '</div>';
+            }).join('');
+        }
+
+        // Referers
+        var refList = $('#stats-referers');
+        if (!data.top_referers || !data.top_referers.length) {
+            refList.innerHTML = '<li style="color:var(--text-secondary)">' + escapeHtml(t('myLinks.noData')) + '</li>';
+        } else {
+            refList.innerHTML = data.top_referers.map(function (r) {
+                return '<li><span class="ref-name">' + escapeHtml(r.referer) + '</span><span class="ref-count">' + r.count + '</span></li>';
+            }).join('');
+        }
+    }
 
     // ── Search / Filter ──────────────────────────────────────
     usersSearch.addEventListener('input', function () {

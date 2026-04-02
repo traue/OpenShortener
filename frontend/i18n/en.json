@@ -140,6 +140,34 @@
         "noUsers": "No users found.",
         "noLinks": "No links found.",
         "viewLinksBtn": "View links",
-        "youLabel": "you"
+        "youLabel": "you",
+        "colLinks": "Links",
+        "createUserTitle": "Create User",
+        "editUserTitle": "Edit User",
+        "createUrlTitle": "Create Link",
+        "editUrlTitle": "Edit Link",
+        "editPasswordHint": "Leave blank to keep the current password",
+        "isAdminLabel": "Administrator",
+        "editBtn": "Edit",
+        "statsBtn": "Statistics",
+        "createUserBtn": "Create User",
+        "createUrlBtn": "Create Link",
+        "saveBtn": "Save",
+        "userCreated": "User created!",
+        "userUpdated": "User updated!",
+        "urlCreated": "Link created!",
+        "urlUpdated": "Link updated!"
+    },
+    "myLinks": {
+        "pageTitle": "My Links · OpenShortner",
+        "viewAll": "View all my links",
+        "loginRequired": "You need to sign in to view your links.",
+        "backHome": "Back to home",
+        "statsTitle": "Link Statistics",
+        "statsBtn": "Statistics",
+        "totalClicks": "Total clicks",
+        "clicksLast30": "Clicks (last 30 days)",
+        "topReferers": "Top referers",
+        "noData": "No data available"
     }
 }

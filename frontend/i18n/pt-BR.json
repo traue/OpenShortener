@@ -140,6 +140,34 @@
         "noUsers": "Nenhum usuário encontrado.",
         "noLinks": "Nenhum link encontrado.",
         "viewLinksBtn": "Ver links",
-        "youLabel": "voc\u00ea"
+        "youLabel": "voc\u00ea",
+        "colLinks": "Links",
+        "createUserTitle": "Criar Usuário",
+        "editUserTitle": "Editar Usuário",
+        "createUrlTitle": "Criar Link",
+        "editUrlTitle": "Editar Link",
+        "editPasswordHint": "Deixe em branco para manter a senha atual",
+        "isAdminLabel": "Administrador",
+        "editBtn": "Editar",
+        "statsBtn": "Estatísticas",
+        "createUserBtn": "Criar Usuário",
+        "createUrlBtn": "Criar Link",
+        "saveBtn": "Salvar",
+        "userCreated": "Usuário criado!",
+        "userUpdated": "Usuário atualizado!",
+        "urlCreated": "Link criado!",
+        "urlUpdated": "Link atualizado!"
+    },
+    "myLinks": {
+        "pageTitle": "Meus Links · OpenShortner",
+        "viewAll": "Ver todos os meus links",
+        "loginRequired": "Você precisa entrar para ver seus links.",
+        "backHome": "Voltar ao início",
+        "statsTitle": "Estatísticas do Link",
+        "statsBtn": "Estatísticas",
+        "totalClicks": "Total de cliques",
+        "clicksLast30": "Cliques (últimos 30 dias)",
+        "topReferers": "Principais referências",
+        "noData": "Sem dados disponíveis"
     }
 }

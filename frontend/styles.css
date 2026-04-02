@@ -407,6 +407,23 @@ input:focus {
     to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── My URLs link (main page) ─────────────────────────────── */
+.my-urls-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.my-urls-link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
 /* ── My URLs ──────────────────────────────────────────────── */
 .my-urls-section {
     margin-top: 3rem;
@@ -953,4 +970,156 @@ input:focus {
     .admin-search input {
         min-width: 100%;
     }
+}
+
+/* ── My Links page ────────────────────────────────────────── */
+.mylinks-main {
+    flex: 1;
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.mylinks-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.mylinks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.mylinks-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.mylinks-search input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    min-width: 200px;
+}
+
+.mylinks-empty-section {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* ── Modal wide (stats) ───────────────────────────────────── */
+.modal-wide {
+    max-width: 640px;
+}
+
+/* ── Form hint ────────────────────────────────────────────── */
+.form-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: -0.25rem;
+}
+
+/* ── Stats body ───────────────────────────────────────────── */
+.stats-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.stats-total {
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.stats-chart-wrap h3,
+.stats-referers-wrap h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.stats-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.stats-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stats-bar-label {
+    min-width: 80px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+.stats-bar-track {
+    flex: 1;
+    height: 18px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stats-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.stats-bar-count {
+    min-width: 30px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.stats-referers {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.stats-referers li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+}
+
+.ref-name {
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 80%;
+}
+
+.ref-count {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
 }
