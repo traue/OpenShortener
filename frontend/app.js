@@ -3,7 +3,7 @@
 
     // ── Config ───────────────────────────────────────────────
     const API = '/api/v1';
-    const SUPPORTED_LANGS = ['en', 'pt-BR'];
+    const SUPPORTED_LANGS = ['en', 'pt-BR', 'es'];
     const DEFAULT_LANG = 'en';
 
     // ── State ────────────────────────────────────────────────
@@ -95,7 +95,8 @@
     // ── Language metadata ────────────────────────────────────
     var LANG_META = {
         'en':    { flag: '🇺🇸', name: 'English' },
-        'pt-BR': { flag: '🇧🇷', name: 'Português (BR)' }
+        'pt-BR': { flag: '🇧🇷', name: 'Português (BR)' },
+        'es':    { flag: '🇪🇸', name: 'Español' }
     };
 
     function renderLangMenu() {

@@ -8,9 +8,12 @@
     <link rel="canonical" href="https://short.opensource.dev.br/terms">
     <meta name="robots" content="index, follow">
     <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="96x96" href="/assets/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
     <link rel="stylesheet" href="styles.css">
     <style>
         .terms { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem; }
@@ -26,9 +29,12 @@
             <a href="/" class="logo">OpenShortener</a>
         </div>
         <div class="header-right">
-            <button id="lang-toggle" class="btn-icon" title="Language" aria-label="Language">
-                <span id="lang-icon">🇧🇷</span>
-            </button>
+            <div class="lang-dropdown">
+                <button id="lang-toggle" class="btn-icon" title="Language" aria-label="Language">
+                    <span id="lang-icon">🇧🇷</span>
+                </button>
+                <div id="lang-menu" class="lang-menu hidden"></div>
+            </div>
         </div>
     </header>
 
@@ -40,8 +46,13 @@
 
     <script>
     (function () {
-        var SUPPORTED = ['en', 'pt-BR'];
+        var SUPPORTED = ['en', 'pt-BR', 'es'];
         var DEFAULT = 'en';
+        var LANG_META = {
+            'en':    { flag: '🇺🇸', name: 'English' },
+            'pt-BR': { flag: '🇧🇷', name: 'Português (BR)' },
+            'es':    { flag: '🇪🇸', name: 'Español' }
+        };
 
         function detect() {
             var s = localStorage.getItem('lang');
@@ -58,13 +69,56 @@
         document.documentElement.setAttribute('data-theme', theme);
 
         var currentLang = detect();
+        var langToggle = document.getElementById('lang-toggle');
+        var langIcon = document.getElementById('lang-icon');
+        var langMenu = document.getElementById('lang-menu');
+        var langDropdown = langToggle.closest('.lang-dropdown');
+
+        function renderLangMenu() {
+            langMenu.innerHTML = SUPPORTED.map(function (code) {
+                var m = LANG_META[code] || { flag: '🌐', name: code };
+                var active = code === currentLang ? ' active' : '';
+                var check = code === currentLang ? '<span class="lang-option-check">✓</span>' : '';
+                return '<button class="lang-option' + active + '" data-lang="' + code + '">' +
+                    '<span class="lang-option-flag">' + m.flag + '</span>' +
+                    '<span class="lang-option-name">' + m.name + '</span>' +
+                    check +
+                '</button>';
+            }).join('');
+
+            langMenu.querySelectorAll('.lang-option').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    load(btn.getAttribute('data-lang'));
+                    langDropdown.classList.remove('open');
+                    langMenu.classList.add('hidden');
+                });
+            });
+        }
+
+        langToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = !langMenu.classList.contains('hidden');
+            langMenu.classList.add('hidden');
+            if (!isOpen) {
+                renderLangMenu();
+                langDropdown.classList.add('open');
+                langMenu.classList.remove('hidden');
+            } else {
+                langDropdown.classList.remove('open');
+            }
+        });
+
+        document.addEventListener('click', function () {
+            langMenu.classList.add('hidden');
+            langDropdown.classList.remove('open');
+        });
 
         function load(code) {
             fetch('/i18n/' + code + '.json').then(function (r) { return r.json(); }).then(function (lang) {
                 currentLang = code;
                 localStorage.setItem('lang', code);
                 document.documentElement.setAttribute('lang', code);
-                document.getElementById('lang-icon').textContent = lang.meta.flag;
+                langIcon.textContent = (LANG_META[code] || {}).flag || lang.meta.flag;
                 document.title = lang.terms.pageTitle;
 
                 var tm = lang.terms;
@@ -93,11 +147,6 @@
             d.appendChild(document.createTextNode(s));
             return d.innerHTML;
         }
-
-        document.getElementById('lang-toggle').addEventListener('click', function () {
-            var idx = SUPPORTED.indexOf(currentLang);
-            load(SUPPORTED[(idx + 1) % SUPPORTED.length]);
-        });
 
         load(currentLang);
     })();
