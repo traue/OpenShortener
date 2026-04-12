@@ -51,6 +51,16 @@ CREATE TABLE rate_limits (
     PRIMARY KEY (ip_address, endpoint)
 ) ENGINE=InnoDB;
 
+-- URL creation counters for captcha throttling.
+-- scope = 'ip' for anonymous callers, 'user' for logged-in callers.
+CREATE TABLE url_creation_counts (
+    scope      VARCHAR(10) NOT NULL,
+    actor      VARCHAR(64) NOT NULL,
+    hits       INT UNSIGNED NOT NULL DEFAULT 0,
+    window_start DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (scope, actor)
+) ENGINE=InnoDB;
+
 -- Seed default admin (password: admin123 - CHANGE IN PRODUCTION)
 -- Default admin (email: admin@admin.com / password: admin123)
 INSERT INTO users (email, password_hash, is_admin) VALUES (

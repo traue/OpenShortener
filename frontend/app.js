@@ -40,6 +40,14 @@
     const qrImg        = $('#qr-img');
     const myUrlsLink   = $('#my-urls-link');
     const expiresToggle = $('#expires-toggle');
+    const captchaWrap   = $('#captcha-wrap');
+    const captchaWidget = $('#captcha-widget');
+
+    // ── Captcha state ────────────────────────────────────────
+    var captchaToken = '';
+    var captchaWidgetId = null;
+    var captchaSiteKey = '';
+    var captchaRendered = false;
 
     // ── i18n ─────────────────────────────────────────────────
     function detectLanguage() {
@@ -304,6 +312,49 @@
         toast(t('toast.logoutSuccess'));
     }
 
+    // ── Captcha (Turnstile) ──────────────────────────────────
+    function renderCaptcha(siteKey) {
+        if (!siteKey) return;
+        captchaSiteKey = siteKey;
+        captchaWrap.classList.remove('hidden');
+        if (captchaRendered || !window.turnstile) return;
+        try {
+            captchaWidgetId = window.turnstile.render(captchaWidget, {
+                sitekey: siteKey,
+                callback: function (token) { captchaToken = token; },
+                'expired-callback': function () { captchaToken = ''; },
+                'error-callback':   function () { captchaToken = ''; }
+            });
+            captchaRendered = true;
+        } catch (_) { /* ignore */ }
+    }
+
+    function resetCaptcha() {
+        captchaToken = '';
+        if (captchaRendered && window.turnstile && captchaWidgetId !== null) {
+            try { window.turnstile.reset(captchaWidgetId); } catch (_) {}
+        }
+    }
+
+    async function checkCaptchaStatus() {
+        try {
+            var status = await api('GET', '/captcha-status');
+            if (status.enabled && status.required && status.site_key) {
+                if (window.turnstile) {
+                    renderCaptcha(status.site_key);
+                } else {
+                    captchaSiteKey = status.site_key;
+                    captchaWrap.classList.remove('hidden');
+                    var tries = 0;
+                    var iv = setInterval(function () {
+                        if (window.turnstile) { clearInterval(iv); renderCaptcha(captchaSiteKey); }
+                        else if (++tries > 50) { clearInterval(iv); }
+                    }, 200);
+                }
+            }
+        } catch (_) { /* ignore */ }
+    }
+
     // ── Shorten ──────────────────────────────────────────────
     shortenForm.addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -316,14 +367,31 @@
         try {
             var payload = { url: url };
             if (alias) payload.alias = alias;
-            if (expiresAt) payload.expires_at = expiresAt.replace('T', ' ') + ':00';
+            if (expiresAt) payload.expires_at = new Date(expiresAt).toISOString();
+            if (captchaToken) payload.captcha_token = captchaToken;
 
-            var data = await api('POST', '/shorten', payload);
+            var res = await fetch(API + '/shorten', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(payload),
+            });
+            var data = await res.json().catch(function () { return {}; });
+
+            if (res.status === 428 && data.captcha_required) {
+                renderCaptcha(data.site_key || captchaSiteKey);
+                toast(t('toast.captchaRequired'), 4000);
+                return;
+            }
+            if (!res.ok) {
+                throw new Error(data.error || t('toast.unknownError'));
+            }
 
             shortUrlA.href = data.short_url;
             shortUrlA.textContent = data.short_url;
             qrImg.src = 'data:image/png;base64,' + data.qr_code;
             resultDiv.classList.remove('hidden');
+            resetCaptcha();
         } catch (err) {
             toast(err.message, 4000);
         }
@@ -361,6 +429,7 @@
     loadLanguage(detectLanguage()).then(function () {
         checkSession().then(function () {
             renderAuthArea();
+            checkCaptchaStatus();
         });
     });
 })();

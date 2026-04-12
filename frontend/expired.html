@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link not found · OpenShortener</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .expired-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .expired-wrap::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 720px;
+            height: 720px;
+            max-width: 120vw;
+            max-height: 120vw;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle at center,
+                rgba(37, 99, 235, 0.22) 0%,
+                rgba(37, 99, 235, 0.10) 35%,
+                rgba(37, 99, 235, 0) 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        [data-theme="dark"] .expired-wrap::before {
+            background: radial-gradient(circle at center,
+                rgba(59, 130, 246, 0.30) 0%,
+                rgba(59, 130, 246, 0.12) 35%,
+                rgba(59, 130, 246, 0) 70%);
+        }
+        .expired-card {
+            position: relative;
+            z-index: 1;
+            max-width: 540px;
+            width: 100%;
+            text-align: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 3.5rem 2.75rem 3rem;
+            box-shadow:
+                0 25px 60px -20px rgba(37, 99, 235, 0.35),
+                0 10px 30px -10px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .expired-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #3b82f6, #2563eb, #6366f1);
+        }
+        .expired-emoji {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 96px;
+            height: 96px;
+            font-size: 3rem;
+            line-height: 1;
+            margin-bottom: 1.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg,
+                rgba(59, 130, 246, 0.18),
+                rgba(99, 102, 241, 0.18));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            animation: float 3.5s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-6px); }
+        }
+        .expired-404 {
+            font-size: 5.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin: 0 0 0.75rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #6366f1 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.04em;
+        }
+        .expired-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 0.6rem;
+        }
+        .expired-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin: 0 0 1.75rem;
+            line-height: 1.55;
+        }
+        .expired-code {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.9rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.5rem 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+        }
+        .expired-code-label {
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
+        .expired-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .expired-actions .btn-primary,
+        .expired-actions .btn-secondary {
+            padding: 0.75rem 1.4rem;
+            font-weight: 600;
+        }
+        @media (max-width: 480px) {
+            .expired-card { padding: 2.5rem 1.5rem 2rem; }
+            .expired-404  { font-size: 4.5rem; }
+            .expired-emoji { width: 80px; height: 80px; font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">OpenShortener</a>
+        </div>
+        <div class="header-right">
+            <button id="theme-toggle" class="btn-icon" aria-label="Toggle theme">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="expired-wrap">
+        <div class="expired-card">
+            <div class="expired-emoji">🔗</div>
+            <div class="expired-404">404</div>
+            <h1 class="expired-title" data-i18n="expired.title">Link not found</h1>
+            <p class="expired-subtitle" data-i18n="expired.subtitle">This link does not exist or has expired.</p>
+            <div id="expired-code" class="expired-code hidden">
+                <span class="expired-code-label" data-i18n="expired.codeLabel">Code</span>
+                <span id="expired-code-value"></span>
+            </div>
+            <div class="expired-actions">
+                <a href="/" class="btn-primary" data-i18n="expired.backHome">Back to home</a>
+                <a href="/#shorten-form" class="btn-secondary" data-i18n="expired.createNew">Create a new link</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/terms.html" data-i18n="footer.terms">Terms</a>
+            <a href="https://github.com/traue/OpenShortener" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <p class="footer-copy" data-i18n="footer.copy"></p>
+    </footer>
+
+    <script>
+    (function () {
+        'use strict';
+        var SUPPORTED = ['en', 'pt-BR', 'es'];
+        var DEFAULT = 'en';
+
+        // Theme
+        var saved = localStorage.getItem('theme');
+        var prefer = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', prefer);
+        document.getElementById('theme-icon').textContent = prefer === 'dark' ? '☀️' : '🌙';
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+            var cur = document.documentElement.getAttribute('data-theme');
+            var next = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Detect language
+        var langCode = localStorage.getItem('lang');
+        if (!langCode || SUPPORTED.indexOf(langCode) === -1) {
+            var nav = (navigator.language || '').toLowerCase();
+            langCode = DEFAULT;
+            for (var i = 0; i < SUPPORTED.length; i++) {
+                if (nav.indexOf(SUPPORTED[i].toLowerCase()) === 0 ||
+                    nav.indexOf(SUPPORTED[i].split('-')[0]) === 0) {
+                    langCode = SUPPORTED[i];
+                    break;
+                }
+            }
+        }
+        document.documentElement.setAttribute('lang', langCode);
+
+        // Load translations and apply
+        fetch('/i18n/' + langCode + '.json').then(function (r) {
+            return r.ok ? r.json() : null;
+        }).then(function (lang) {
+            if (!lang) return;
+            function t(key) {
+                var parts = key.split('.'); var v = lang;
+                for (var i = 0; i < parts.length; i++) {
+                    if (v && typeof v === 'object') v = v[parts[i]];
+                    else return key;
+                }
+                return v || key;
+            }
+            var nodes = document.querySelectorAll('[data-i18n]');
+            for (var i = 0; i < nodes.length; i++) {
+                nodes[i].textContent = t(nodes[i].getAttribute('data-i18n'));
+            }
+            document.title = t('expired.title') + ' · OpenShortener';
+        });
+
+        // Extract the attempted code from the URL. When served at /{code} the
+        // path holds it directly; when loaded directly via /expired.html we
+        // also support ?code=xxx for manual previews.
+        var code = '';
+        var path = (location.pathname || '').replace(/^\//, '').replace(/\/$/, '');
+        if (path && path.toLowerCase() !== 'expired.html') {
+            code = path;
+        } else {
+            var params = new URLSearchParams(location.search);
+            code = params.get('code') || '';
+        }
+        if (code) {
+            document.getElementById('expired-code-value').textContent = code;
+            document.getElementById('expired-code').classList.remove('hidden');
+        }
+    })();
+    </script>
+</body>
+</html>

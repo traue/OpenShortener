@@ -14,6 +14,28 @@ final class UrlService
         'favicon', 'login', 'register', 'logout',
     ];
 
+    /**
+     * Parses an incoming expires_at value (ISO-8601 or 'Y-m-d H:i:s') and
+     * returns a UTC 'Y-m-d H:i:s' string. Returns null if input is empty.
+     * Throws on invalid format or past dates.
+     */
+    public static function parseExpiresAt(?string $input): ?string
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+        try {
+            $dt = new \DateTimeImmutable($input);
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException('Invalid expiration date');
+        }
+        $utc = $dt->setTimezone(new \DateTimeZone('UTC'));
+        if ($utc->getTimestamp() <= time()) {
+            throw new \InvalidArgumentException('Expiration must be in the future');
+        }
+        return $utc->format('Y-m-d H:i:s');
+    }
+
     public static function shorten(string $originalUrl, ?string $alias, ?string $expiresAt, ?int $userId): array
     {
         $cfg = require __DIR__ . '/../../config/app.php';
@@ -22,6 +44,9 @@ final class UrlService
         if (!filter_var($originalUrl, FILTER_VALIDATE_URL)) {
             throw new \InvalidArgumentException('Invalid URL');
         }
+
+        // Validate & normalize expiration (stored as UTC)
+        $expiresAt = self::parseExpiresAt($expiresAt);
 
         // Determine short code
         if ($alias !== null && $alias !== '') {
@@ -86,13 +111,28 @@ final class UrlService
             return null;
         }
 
-        // Check expiration
-        if ($url['expires_at'] !== null && strtotime($url['expires_at']) < time()) {
+        if (self::isExpired($url['expires_at'] ?? null)) {
             return null;
         }
 
         Url::incrementClicks((int) $url['id']);
 
         return $url;
+    }
+
+    public static function isExpired(?string $expiresAt): bool
+    {
+        if ($expiresAt === null || $expiresAt === '') {
+            return false;
+        }
+        $ts = \DateTimeImmutable::createFromFormat(
+            'Y-m-d H:i:s',
+            $expiresAt,
+            new \DateTimeZone('UTC')
+        );
+        if ($ts === false) {
+            return true;
+        }
+        return $ts->getTimestamp() <= time();
     }
 }

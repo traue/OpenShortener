@@ -18,7 +18,8 @@
         "expiresTitle": "Expiration (optional)",
         "enableExpiration": "Set expiration",
         "shortenBtn": "Shorten",
-        "copyBtn": "Copy"
+        "copyBtn": "Copy",
+        "captchaHint": "Please confirm you're human to continue."
     },
     "myUrls": {
         "title": "My Links",
@@ -61,7 +62,8 @@
         "updated": "Link updated!",
         "deleted": "Link deleted",
         "unknownError": "Unknown error",
-        "passwordChanged": "Password changed!"
+        "passwordChanged": "Password changed!",
+        "captchaRequired": "Please complete the captcha below."
     },
     "footer": {
         "terms": "Terms of Use",
@@ -133,7 +135,6 @@
         "blockBtn": "Block user",
         "unblockBtn": "Unblock user",
         "deleteBtn": "Delete",
-        "confirmDeleteUser": "Delete user {email}? This cannot be undone.",
         "confirmDeleteUrl": "Delete this link? This cannot be undone.",
         "userBlocked": "User blocked",
         "userActivated": "User activated",
@@ -156,7 +157,17 @@
         "userCreated": "User created!",
         "userUpdated": "User updated!",
         "urlCreated": "Link created!",
-        "urlUpdated": "Link updated!"
+        "urlUpdated": "Link updated!",
+        "ownerLabel": "Owner",
+        "noOwner": "No owner (anonymous)",
+        "confirmDeleteUser": "Deactivate user {email}? Their links will be kept and attached to this (now inactive) account. You can reactivate later."
+    },
+    "expired": {
+        "title": "Link not found",
+        "subtitle": "This link does not exist or has expired.",
+        "codeLabel": "Code",
+        "backHome": "Back to home",
+        "createNew": "Create a new link"
     },
     "myLinks": {
         "pageTitle": "My Links · OpenShortener",

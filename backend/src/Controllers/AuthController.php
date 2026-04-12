@@ -52,7 +52,8 @@ final class AuthController
             return;
         }
         $user = \App\Models\User::findById($userId);
-        if (!$user) {
+        if (!$user || !(int) $user['is_active']) {
+            AuthService::logout();
             Response::error('Unauthorized', 401);
             return;
         }

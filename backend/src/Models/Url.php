@@ -61,12 +61,66 @@ final class Url
         return $stmt->fetchAll();
     }
 
+    public static function findByUserPaged(int $userId, int $perPage, int $offset, ?string $search = null): array
+    {
+        $pdo = Database::pdo();
+        $hasSearch = $search !== null && $search !== '';
+        $where = 'WHERE user_id = :uid';
+        $bind = ['uid' => $userId];
+        if ($hasSearch) {
+            $where .= ' AND (original_url LIKE :q OR short_code LIKE :q)';
+            $bind['q'] = '%' . $search . '%';
+        }
+
+        $total = (int) (function () use ($pdo, $where, $bind) {
+            $stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM urls {$where}");
+            $stmt->execute($bind);
+            return $stmt->fetch()['c'] ?? 0;
+        })();
+
+        $sql = "SELECT id, original_url, short_code, expires_at, clicks, is_active, created_at
+                FROM urls {$where}
+                ORDER BY created_at DESC
+                LIMIT " . (int) $perPage . " OFFSET " . (int) $offset . "";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($bind);
+        return ['rows' => $stmt->fetchAll(), 'total' => $total];
+    }
+
+    public static function allWithOwnerPaged(int $perPage, int $offset, ?string $search = null): array
+    {
+        $pdo = Database::pdo();
+        $hasSearch = $search !== null && $search !== '';
+        $where = '';
+        $bind = [];
+        if ($hasSearch) {
+            $where = 'WHERE u.original_url LIKE :q OR u.short_code LIKE :q OR usr.email LIKE :q';
+            $bind['q'] = '%' . $search . '%';
+        }
+
+        $total = (int) (function () use ($pdo, $where, $bind) {
+            $stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM urls u LEFT JOIN users usr ON u.user_id = usr.id {$where}");
+            $stmt->execute($bind);
+            return $stmt->fetch()['c'] ?? 0;
+        })();
+
+        $sql = "SELECT u.id, u.original_url, u.short_code, u.user_id, u.expires_at, u.clicks, u.is_active, u.created_at, usr.email AS owner_email
+                FROM urls u
+                LEFT JOIN users usr ON u.user_id = usr.id
+                {$where}
+                ORDER BY u.created_at DESC
+                LIMIT " . (int) $perPage . " OFFSET " . (int) $offset . "";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($bind);
+        return ['rows' => $stmt->fetchAll(), 'total' => $total];
+    }
+
     public static function update(int $id, array $fields): bool
     {
         $sets = [];
         $params = ['id' => $id];
+        $allowed = ['original_url', 'short_code', 'expires_at', 'is_active', 'user_id'];
         foreach ($fields as $col => $val) {
-            $allowed = ['original_url', 'short_code', 'expires_at', 'is_active'];
             if (!in_array($col, $allowed, true)) {
                 continue;
             }

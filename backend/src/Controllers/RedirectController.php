@@ -19,10 +19,8 @@ final class RedirectController
         $url = UrlService::resolve($code);
 
         if (!$url) {
-            http_response_code(404);
-            header('Content-Type: text/html; charset=utf-8');
-            echo $this->expiredPage();
-            exit;
+            $this->renderExpiredPage($code);
+            return;
         }
 
         // Log click details
@@ -45,7 +43,7 @@ final class RedirectController
             Response::error('Not found', 404);
         }
 
-        if ($url['expires_at'] !== null && strtotime($url['expires_at']) < time()) {
+        if (UrlService::isExpired($url['expires_at'] ?? null)) {
             Response::error('Link expired', 410);
         }
 
@@ -59,33 +57,15 @@ final class RedirectController
         exit;
     }
 
-    private function expiredPage(): string
+    private function renderExpiredPage(string $code): void
     {
-        return <<<'HTML'
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link not found</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;color:#e2e8f0}
-        .card{text-align:center;padding:3rem 2rem;max-width:480px}
-        h1{font-size:4rem;margin-bottom:1rem;color:#f43f5e}
-        p{font-size:1.125rem;margin-bottom:2rem;color:#94a3b8}
-        a{color:#38bdf8;text-decoration:none;font-weight:600}
-        a:hover{text-decoration:underline}
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>404</h1>
-        <p>This link does not exist or has expired.</p>
-        <a href="/">&larr; Back to home</a>
-    </div>
-</body>
-</html>
-HTML;
+        // The frontend (expired.html) is served by a separate web server in
+        // most setups (Docker, split frontend/backend deploys), so we can't
+        // readfile() it from here. Redirect to the static page instead and
+        // let it pick up the offending code from the ?code= query param.
+        $target = '/expired.html?code=' . rawurlencode($code);
+        header('Location: ' . $target, true, 302);
+        header('Cache-Control: no-store');
+        exit;
     }
 }
