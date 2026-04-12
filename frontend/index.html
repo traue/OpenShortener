@@ -27,6 +27,7 @@
     <link rel="apple-touch-icon" sizes="96x96" href="/assets/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -90,6 +91,10 @@
                         <span data-i18n="form.enableExpiration"></span>
                     </label>
                     <input type="datetime-local" id="expires-input" class="hidden" data-i18n-title="form.expiresTitle">
+                </div>
+                <div id="captcha-wrap" class="captcha-wrap hidden">
+                    <div id="captcha-widget"></div>
+                    <p class="captcha-hint" data-i18n="form.captchaHint"></p>
                 </div>
             </form>
 

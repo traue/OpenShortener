@@ -12,6 +12,11 @@
     var langCode = '';
     var usersData = [];
     var urlsData = [];
+    var urlsPage = 1;
+    var urlsPerPage = 25;
+    var urlsTotal = 0;
+    var urlsCurrentSearch = '';
+    var urlsSearchDebounce = null;
 
     // ── DOM refs ─────────────────────────────────────────────
     var $ = function (sel) { return document.querySelector(sel); };
@@ -36,6 +41,7 @@
     var urlsEmpty    = $('#urls-empty');
     var usersSearch  = $('#users-search');
     var urlsSearch   = $('#urls-search');
+    var urlsPagination = $('#urls-pagination');
 
     // ── i18n ─────────────────────────────────────────────────
     function detectLanguage() {
@@ -186,10 +192,30 @@
         return div.innerHTML;
     }
 
+    function parseServerUtc(str) {
+        if (!str) return null;
+        return new Date(str.replace(' ', 'T') + 'Z');
+    }
     function formatDate(dateStr) {
-        if (!dateStr) return '—';
-        var d = new Date(dateStr.replace(' ', 'T'));
-        return d.toLocaleDateString(langCode, { year: 'numeric', month: 'short', day: 'numeric' });
+        var d = parseServerUtc(dateStr);
+        if (!d) return '—';
+        return d.toLocaleDateString(langCode || undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    function formatDateTime(dateStr) {
+        var d = parseServerUtc(dateStr);
+        if (!d) return '—';
+        return d.toLocaleString(langCode || undefined, {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+    // datetime-local input displays local time — convert UTC server value → local YYYY-MM-DDTHH:MM
+    function serverUtcToLocalInput(str) {
+        var d = parseServerUtc(str);
+        if (!d) return '';
+        var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+            'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
     }
 
     // ── Auth ─────────────────────────────────────────────────
@@ -265,13 +291,35 @@
 
     async function loadUrls() {
         try {
-            urlsData = await api('GET', '/admin/urls');
-            urlsCount.textContent = urlsData.length;
+            var qs = '?page=' + urlsPage + '&per_page=' + urlsPerPage;
+            if (urlsCurrentSearch) qs += '&q=' + encodeURIComponent(urlsCurrentSearch);
+            var resp = await api('GET', '/admin/urls' + qs);
+            urlsData = resp.data || [];
+            urlsTotal = resp.total || 0;
+            urlsCount.textContent = urlsTotal;
             renderUrlsTable(urlsData);
+            renderUrlsPagination();
         } catch (err) {
             if (err.message === 'Unauthorized') { showLogin(); return; }
             toast(err.message, 4000);
         }
+    }
+
+    function renderUrlsPagination() {
+        if (!urlsPagination) return;
+        var totalPages = Math.max(1, Math.ceil(urlsTotal / urlsPerPage));
+        if (urlsTotal <= urlsPerPage) { urlsPagination.innerHTML = ''; return; }
+        var prev = urlsPage > 1
+            ? '<button class="btn-secondary btn-small" id="urls-page-prev">←</button>'
+            : '<button class="btn-secondary btn-small" disabled>←</button>';
+        var next = urlsPage < totalPages
+            ? '<button class="btn-secondary btn-small" id="urls-page-next">→</button>'
+            : '<button class="btn-secondary btn-small" disabled>→</button>';
+        urlsPagination.innerHTML = prev +
+            '<span class="page-info">' + urlsPage + ' / ' + totalPages + ' · ' + urlsTotal + '</span>' +
+            next;
+        var pp = $('#urls-page-prev'); if (pp) pp.addEventListener('click', function () { urlsPage--; loadUrls(); });
+        var pn = $('#urls-page-next'); if (pn) pn.addEventListener('click', function () { urlsPage++; loadUrls(); });
     }
 
     // ── Render Users ─────────────────────────────────────────
@@ -323,7 +371,7 @@
         urlsEmpty.classList.add('hidden');
 
         urlsTbody.innerHTML = urls.map(function (u) {
-            var exp = u.expires_at ? formatDate(u.expires_at) : '∞';
+            var exp = u.expires_at ? formatDateTime(u.expires_at) : '∞';
             var owner = u.owner_email ? escapeHtml(u.owner_email) : '—';
 
             return '<tr>' +
@@ -495,6 +543,17 @@
     var urlModalTitle    = $('#url-modal-title');
     var urlModalSubmit   = $('#url-modal-submit');
     var urlModalError    = $('#url-modal-error');
+    var urlModalOwner    = $('#url-modal-owner');
+
+    function populateOwnerSelect(selectedId) {
+        if (!urlModalOwner) return;
+        var opts = ['<option value="">— ' + escapeHtml(t('admin.noOwner')) + ' —</option>'];
+        usersData.forEach(function (u) {
+            var sel = Number(u.id) === Number(selectedId) ? ' selected' : '';
+            opts.push('<option value="' + u.id + '"' + sel + '>' + escapeHtml(u.email) + '</option>');
+        });
+        urlModalOwner.innerHTML = opts.join('');
+    }
 
     $('#btn-create-url').addEventListener('click', function () {
         urlModalId.value = '';
@@ -502,6 +561,7 @@
         urlModalAlias.value = '';
         urlModalExpires.value = '';
         urlModalAlias.disabled = false;
+        populateOwnerSelect(null);
         urlModalTitle.textContent = t('admin.createUrlTitle');
         urlModalSubmit.textContent = t('admin.createUrlBtn');
         urlModalError.classList.add('hidden');
@@ -515,7 +575,8 @@
         urlModalUrl.value = url.original_url;
         urlModalAlias.value = url.short_code;
         urlModalAlias.disabled = false;
-        urlModalExpires.value = url.expires_at ? url.expires_at.replace(' ', 'T').substring(0, 16) : '';
+        urlModalExpires.value = serverUtcToLocalInput(url.expires_at);
+        populateOwnerSelect(url.user_id);
         urlModalTitle.textContent = t('admin.editUrlTitle');
         urlModalSubmit.textContent = t('admin.saveBtn');
         urlModalError.classList.add('hidden');
@@ -539,21 +600,25 @@
         var url = urlModalUrl.value.trim();
         var alias = urlModalAlias.value.trim();
         var expires = urlModalExpires.value;
+        var ownerRaw = urlModalOwner ? urlModalOwner.value : '';
+        var expiresIso = expires ? new Date(expires).toISOString() : null;
 
         try {
             if (id) {
                 // Edit
                 var body = { url: url };
                 if (alias) body.alias = alias;
-                body.expires_at = expires || null;
+                body.expires_at = expiresIso;
+                body.user_id = ownerRaw === '' ? null : Number(ownerRaw);
                 await api('PUT', '/admin/urls/' + id, body);
                 toast(t('admin.urlUpdated'));
             } else {
                 // Create
-                var body = { url: url };
-                if (alias) body.alias = alias;
-                if (expires) body.expires_at = expires;
-                await api('POST', '/admin/urls', body);
+                var cbody = { url: url };
+                if (alias) cbody.alias = alias;
+                if (expiresIso) cbody.expires_at = expiresIso;
+                if (ownerRaw !== '') cbody.user_id = Number(ownerRaw);
+                await api('POST', '/admin/urls', cbody);
                 toast(t('admin.urlCreated'));
             }
             closeUrlModal();
@@ -622,15 +687,12 @@
     });
 
     urlsSearch.addEventListener('input', function () {
-        var q = urlsSearch.value.toLowerCase().trim();
-        if (!q) { renderUrlsTable(urlsData); return; }
-        var filtered = urlsData.filter(function (u) {
-            return u.original_url.toLowerCase().indexOf(q) !== -1 ||
-                   u.short_code.toLowerCase().indexOf(q) !== -1 ||
-                   (u.owner_email && u.owner_email.toLowerCase().indexOf(q) !== -1) ||
-                   String(u.id).indexOf(q) !== -1;
-        });
-        renderUrlsTable(filtered);
+        clearTimeout(urlsSearchDebounce);
+        urlsSearchDebounce = setTimeout(function () {
+            urlsCurrentSearch = urlsSearch.value.trim();
+            urlsPage = 1;
+            loadUrls();
+        }, 250);
     });
 
     // ── Init ─────────────────────────────────────────────────

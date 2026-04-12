@@ -9,6 +9,7 @@ use App\Core\Response;
 use App\Core\Session;
 use App\Models\ClickLog;
 use App\Models\Url;
+use App\Services\CaptchaService;
 use App\Services\QrCodeService;
 use App\Services\UrlService;
 
@@ -19,15 +20,35 @@ final class UrlController
         $body = Request::body();
         $originalUrl = trim($body['url'] ?? '');
         $alias       = isset($body['alias']) ? trim($body['alias']) : null;
-        $expiresAt   = isset($body['expires_at']) ? trim($body['expires_at']) : null;
+        $expiresAt   = isset($body['expires_at']) ? trim((string) $body['expires_at']) : null;
         $userId      = Session::get('user_id');
 
         if ($originalUrl === '') {
             Response::error('URL is required', 422);
         }
 
+        // Captcha throttling — after N creates within the window, require a Turnstile token.
+        [$scope, $actor] = $userId
+            ? ['user', (string) $userId]
+            : ['ip', (string) \App\Core\Request::ip()];
+
+        if (CaptchaService::isRequired($scope, $actor)) {
+            $token = (string) ($body['captcha_token'] ?? '');
+            if (!CaptchaService::verifyToken($token, \App\Core\Request::ip())) {
+                Response::json([
+                    'error'            => 'Captcha required',
+                    'captcha_required' => true,
+                    'site_key'         => CaptchaService::siteKey(),
+                ], 428);
+                return;
+            }
+        }
+
         try {
-            $result = UrlService::shorten($originalUrl, $alias, $expiresAt, $userId);
+            $result = UrlService::shorten($originalUrl, $alias, $expiresAt, $userId ? (int) $userId : null);
+
+            // Count successful creates toward the captcha threshold
+            CaptchaService::recordHit($scope, $actor);
 
             // Generate QR Code
             $qr = QrCodeService::generate($result['short_url']);
@@ -39,18 +60,45 @@ final class UrlController
         }
     }
 
-    public function myUrls(array $params): void
+    public function captchaStatus(array $params): void
     {
         $userId = Session::get('user_id');
+        [$scope, $actor] = $userId
+            ? ['user', (string) $userId]
+            : ['ip', (string) \App\Core\Request::ip()];
+
+        Response::json([
+            'enabled'   => CaptchaService::isEnabled(),
+            'required'  => CaptchaService::isRequired($scope, $actor),
+            'site_key'  => CaptchaService::siteKey(),
+            'hits'      => CaptchaService::currentHits($scope, $actor),
+            'threshold' => CaptchaService::thresholdFor($scope),
+        ]);
+    }
+
+    public function myUrls(array $params): void
+    {
+        $userId = (int) Session::get('user_id');
         $cfg = require __DIR__ . '/../../config/app.php';
-        $urls = Url::findByUser($userId);
+
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $perPage = min(100, max(1, (int) ($_GET['per_page'] ?? 10)));
+        $search  = isset($_GET['q']) ? trim((string) $_GET['q']) : null;
+        $offset  = ($page - 1) * $perPage;
+
+        $result = Url::findByUserPaged($userId, $perPage, $offset, $search);
 
         $mapped = array_map(function ($u) use ($cfg) {
             $u['short_url'] = $cfg['base_url'] . '/' . $u['short_code'];
             return $u;
-        }, $urls);
+        }, $result['rows']);
 
-        Response::json($mapped);
+        Response::json([
+            'data'     => $mapped,
+            'total'    => $result['total'],
+            'page'     => $page,
+            'per_page' => $perPage,
+        ]);
     }
 
     public function update(array $params): void
@@ -86,7 +134,11 @@ final class UrlController
         }
 
         if (array_key_exists('expires_at', $body)) {
-            $fields['expires_at'] = $body['expires_at'];
+            try {
+                $fields['expires_at'] = UrlService::parseExpiresAt($body['expires_at']);
+            } catch (\InvalidArgumentException $e) {
+                Response::error($e->getMessage(), 422);
+            }
         }
 
         if (empty($fields)) {

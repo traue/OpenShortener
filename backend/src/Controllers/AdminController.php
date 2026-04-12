@@ -34,7 +34,7 @@ final class AdminController
         $userId = Session::get('user_id');
         if (!$userId) { Response::error('Unauthorized', 401); return; }
         $user = User::findById($userId);
-        if (!$user || !(int) $user['is_admin']) {
+        if (!$user || !(int) $user['is_admin'] || !(int) $user['is_active']) {
             Response::error('Unauthorized', 401);
             return;
         }
@@ -150,12 +150,24 @@ final class AdminController
     public function listUrls(array $params): void
     {
         $cfg = require __DIR__ . '/../../config/app.php';
-        $urls = Url::allWithOwner();
+
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $perPage = min(200, max(1, (int) ($_GET['per_page'] ?? 25)));
+        $search  = isset($_GET['q']) ? trim((string) $_GET['q']) : null;
+        $offset  = ($page - 1) * $perPage;
+
+        $result = Url::allWithOwnerPaged($perPage, $offset, $search);
         $mapped = array_map(function ($u) use ($cfg) {
             $u['short_url'] = $cfg['base_url'] . '/' . $u['short_code'];
             return $u;
-        }, $urls);
-        Response::json($mapped);
+        }, $result['rows']);
+
+        Response::json([
+            'data'     => $mapped,
+            'total'    => $result['total'],
+            'page'     => $page,
+            'per_page' => $perPage,
+        ]);
     }
 
     public function listUserUrls(array $params): void
@@ -192,12 +204,22 @@ final class AdminController
         $body = Request::body();
         $originalUrl = trim($body['url'] ?? '');
         $alias = isset($body['alias']) ? trim($body['alias']) : null;
-        $expiresAt = isset($body['expires_at']) ? trim($body['expires_at']) : null;
-        $userId = isset($body['user_id']) ? (int) $body['user_id'] : null;
+        $expiresAt = isset($body['expires_at']) ? trim((string) $body['expires_at']) : null;
+        $userId = array_key_exists('user_id', $body) && $body['user_id'] !== null && $body['user_id'] !== ''
+            ? (int) $body['user_id']
+            : null;
 
         if ($originalUrl === '') {
             Response::error('URL is required', 422);
             return;
+        }
+
+        if ($userId !== null) {
+            $owner = User::findById($userId);
+            if (!$owner) {
+                Response::error('Target user not found', 422);
+                return;
+            }
         }
 
         try {
@@ -241,10 +263,31 @@ final class AdminController
             $fields['short_code'] = $alias;
         }
         if (array_key_exists('expires_at', $body)) {
-            $fields['expires_at'] = $body['expires_at'];
+            try {
+                $fields['expires_at'] = UrlService::parseExpiresAt(
+                    $body['expires_at'] === null ? null : (string) $body['expires_at']
+                );
+            } catch (\InvalidArgumentException $e) {
+                Response::error($e->getMessage(), 422);
+                return;
+            }
         }
         if (array_key_exists('is_active', $body)) {
             $fields['is_active'] = $body['is_active'] ? 1 : 0;
+        }
+        if (array_key_exists('user_id', $body)) {
+            $newOwner = $body['user_id'];
+            if ($newOwner === null || $newOwner === '') {
+                $fields['user_id'] = null;
+            } else {
+                $newOwnerId = (int) $newOwner;
+                $owner = User::findById($newOwnerId);
+                if (!$owner) {
+                    Response::error('Target user not found', 422);
+                    return;
+                }
+                $fields['user_id'] = $newOwnerId;
+            }
         }
 
         if (empty($fields)) {

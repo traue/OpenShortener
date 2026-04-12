@@ -27,6 +27,9 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 
+// ── Timezone (server-side is always UTC) ───────────────────────
+date_default_timezone_set('UTC');
+
 // ── Environment ────────────────────────────────────────────────
 Env::load($envPath);
 
@@ -39,7 +42,13 @@ header("Access-Control-Allow-Origin: {$origin}");
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
 header('Access-Control-Allow-Credentials: true');
-header('Content-Type: application/json; charset=utf-8');
+
+// Default Content-Type only for API routes; redirect/QR controllers
+// set their own (text/html or image/png) and must not be overridden.
+$rawPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+if (str_starts_with($rawPath, '/api/')) {
+    header('Content-Type: application/json; charset=utf-8');
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);

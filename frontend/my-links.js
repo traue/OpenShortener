@@ -11,6 +11,11 @@
     var lang = {};
     var langCode = '';
     var allUrls = [];
+    var currentPage = 1;
+    var perPage = 10;
+    var totalUrls = 0;
+    var currentSearch = '';
+    var searchDebounce = null;
 
     // ── DOM refs ─────────────────────────────────────────────
     var $ = function (sel) { return document.querySelector(sel); };
@@ -31,6 +36,7 @@
     var passwordModal = $('#password-modal');
     var passwordForm  = $('#password-form');
     var passwordError = $('#password-error');
+    var paginationEl = $('#mylinks-pagination');
 
     // ── i18n ─────────────────────────────────────────────────
     function detectLanguage() {
@@ -150,6 +156,21 @@
     function escapeHtml(str) { var d = document.createElement('div'); d.appendChild(document.createTextNode(String(str))); return d.innerHTML; }
     function escapeAttr(str) { return str.replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
+    // ── Date helpers (server stores UTC 'Y-m-d H:i:s') ───────
+    function parseServerUtc(str) {
+        if (!str) return null;
+        // Interpret as UTC regardless of local browser TZ
+        return new Date(str.replace(' ', 'T') + 'Z');
+    }
+    function formatLocalDateTime(str) {
+        var d = parseServerUtc(str);
+        if (!d) return '';
+        return d.toLocaleString(langCode || undefined, {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
     // ── Auth UI ──────────────────────────────────────────────
     function renderAuthArea() {
         if (currentUser) {
@@ -191,9 +212,31 @@
     // ── Load My URLs ─────────────────────────────────────────
     async function loadMyUrls() {
         try {
-            allUrls = await api('GET', '/my-urls');
+            var qs = '?page=' + currentPage + '&per_page=' + perPage;
+            if (currentSearch) qs += '&q=' + encodeURIComponent(currentSearch);
+            var resp = await api('GET', '/my-urls' + qs);
+            allUrls = resp.data || [];
+            totalUrls = resp.total || 0;
             renderMyUrls(allUrls);
+            renderPagination();
         } catch (_) {}
+    }
+
+    function renderPagination() {
+        if (!paginationEl) return;
+        var totalPages = Math.max(1, Math.ceil(totalUrls / perPage));
+        if (totalUrls <= perPage) { paginationEl.innerHTML = ''; return; }
+        var prev = currentPage > 1
+            ? '<button class="btn-secondary btn-small" id="page-prev">←</button>'
+            : '<button class="btn-secondary btn-small" disabled>←</button>';
+        var next = currentPage < totalPages
+            ? '<button class="btn-secondary btn-small" id="page-next">→</button>'
+            : '<button class="btn-secondary btn-small" disabled>→</button>';
+        paginationEl.innerHTML = prev +
+            '<span class="page-info">' + currentPage + ' / ' + totalPages + ' · ' + totalUrls + '</span>' +
+            next;
+        var pp = $('#page-prev'); if (pp) pp.addEventListener('click', function () { currentPage--; loadMyUrls(); });
+        var pn = $('#page-next'); if (pn) pn.addEventListener('click', function () { currentPage++; loadMyUrls(); });
     }
 
     function renderMyUrls(urls) {
@@ -204,7 +247,7 @@
 
         mylinksList.innerHTML = urls.map(function (u) {
             var exp = u.expires_at
-                ? '<span class="badge">⏱ ' + escapeHtml(t('myUrls.expires')) + ' ' + escapeHtml(u.expires_at) + '</span>'
+                ? '<span class="badge">⏱ ' + escapeHtml(t('myUrls.expires')) + ' ' + escapeHtml(formatLocalDateTime(u.expires_at)) + '</span>'
                 : '<span class="badge">∞ ' + escapeHtml(t('myUrls.noExpiration')) + '</span>';
             return '<div class="url-card" data-id="' + u.id + '">' +
                 '<div class="url-card-info">' +
@@ -223,15 +266,14 @@
         }).join('');
     }
 
-    // ── Search / Filter ──────────────────────────────────────
+    // ── Search / Filter (server-side, debounced) ─────────────
     linksSearch.addEventListener('input', function () {
-        var q = linksSearch.value.toLowerCase().trim();
-        if (!q) { renderMyUrls(allUrls); return; }
-        var filtered = allUrls.filter(function (u) {
-            return u.original_url.toLowerCase().indexOf(q) !== -1 ||
-                   u.short_url.toLowerCase().indexOf(q) !== -1;
-        });
-        renderMyUrls(filtered);
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(function () {
+            currentSearch = linksSearch.value.trim();
+            currentPage = 1;
+            loadMyUrls();
+        }, 250);
     });
 
     // ── Global actions ───────────────────────────────────────

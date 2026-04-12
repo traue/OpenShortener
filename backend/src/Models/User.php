@@ -42,9 +42,13 @@ final class User
         )->fetchAll();
     }
 
+    /**
+     * Soft delete: deactivates the user but keeps the row so their links
+     * remain attached. Login/middleware checks is_active to block access.
+     */
     public static function delete(int $id): bool
     {
-        $stmt = Database::pdo()->prepare('DELETE FROM users WHERE id = :id');
+        $stmt = Database::pdo()->prepare('UPDATE users SET is_active = 0 WHERE id = :id');
         return $stmt->execute(['id' => $id]);
     }
 

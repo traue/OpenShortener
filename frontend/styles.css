@@ -303,6 +303,7 @@ input:focus {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    min-height: 44px; /* keeps the row height stable when datetime-local is toggled in */
 }
 
 .switch-label {
@@ -368,6 +369,39 @@ input:focus {
 
 .expiration-toggle input[type="datetime-local"] {
     flex: 1;
+    min-width: 0;
+    height: 44px;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 0.95rem;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+.expiration-toggle input[type="datetime-local"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+}
+
+/* ── Captcha ──────────────────────────────────────────────── */
+.captcha-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.captcha-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 0;
 }
 
 /* ── Result ───────────────────────────────────────────────── */
@@ -920,6 +954,60 @@ input:focus {
     background: rgba(99, 102, 241, 0.1);
     color: #818cf8;
     border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* ── Pagination ───────────────────────────────────────────── */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.pagination:empty {
+    display: none;
+}
+
+.pagination .page-info {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    min-width: 80px;
+    text-align: center;
+}
+
+.pagination button[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ── Form select / field labels (reused across modals) ─── */
+.form-select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 0.95rem;
+}
+
+.form-select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+}
+
+.form-field-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    margin-bottom: -0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* ── Responsive ───────────────────────────────────────────── */

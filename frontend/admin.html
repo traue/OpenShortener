@@ -124,6 +124,7 @@
                 </table>
             </div>
             <p id="urls-empty" class="admin-empty hidden" data-i18n="admin.noLinks"></p>
+            <div id="urls-pagination" class="pagination"></div>
         </div>
     </section>
 
@@ -162,6 +163,8 @@
                 <input type="url" id="url-modal-url" data-i18n-placeholder="form.urlPlaceholder" required>
                 <input type="text" id="url-modal-alias" data-i18n-placeholder="form.aliasPlaceholder" pattern="[a-zA-Z0-9_\-]+">
                 <input type="datetime-local" id="url-modal-expires" data-i18n-title="form.expiresTitle">
+                <label class="form-field-label" data-i18n="admin.ownerLabel"></label>
+                <select id="url-modal-owner" class="form-select"></select>
                 <button type="submit" class="btn-primary" id="url-modal-submit" data-i18n="admin.createUrlBtn"></button>
                 <p id="url-modal-error" class="form-error hidden"></p>
             </form>

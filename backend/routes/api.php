@@ -24,6 +24,7 @@ $router->put('/api/v1/password',   [AuthController::class, 'changePassword'], [$
 
 // ── URLs (authenticated user) ──────────────────────────────────
 $router->post('/api/v1/shorten',       [UrlController::class, 'shorten'],  [$rateLimit]);
+$router->get('/api/v1/captcha-status', [UrlController::class, 'captchaStatus']);
 $router->get('/api/v1/my-urls',        [UrlController::class, 'myUrls'],   [$authUser]);
 $router->put('/api/v1/urls/{id}',      [UrlController::class, 'update'],   [$authUser]);
 $router->delete('/api/v1/urls/{id}',   [UrlController::class, 'delete'],   [$authUser]);

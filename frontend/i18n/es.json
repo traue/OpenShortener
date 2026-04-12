@@ -18,7 +18,8 @@
         "expiresTitle": "Expiración (opcional)",
         "enableExpiration": "Definir expiración",
         "shortenBtn": "Acortar",
-        "copyBtn": "Copiar"
+        "copyBtn": "Copiar",
+        "captchaHint": "Por favor, confirma que eres humano para continuar."
     },
     "myUrls": {
         "title": "Mis Enlaces",
@@ -61,7 +62,8 @@
         "updated": "¡Enlace actualizado!",
         "deleted": "Enlace eliminado",
         "unknownError": "Error desconocido",
-        "passwordChanged": "¡Contraseña cambiada!"
+        "passwordChanged": "¡Contraseña cambiada!",
+        "captchaRequired": "Por favor, completa el captcha a continuación."
     },
     "footer": {
         "terms": "Términos de Uso",
@@ -133,7 +135,6 @@
         "blockBtn": "Bloquear usuario",
         "unblockBtn": "Desbloquear usuario",
         "deleteBtn": "Eliminar",
-        "confirmDeleteUser": "¿Eliminar al usuario {email}? Esta acción no se puede deshacer.",
         "confirmDeleteUrl": "¿Eliminar este enlace? Esta acción no se puede deshacer.",
         "userBlocked": "Usuario bloqueado",
         "userActivated": "Usuario activado",
@@ -156,7 +157,17 @@
         "userCreated": "¡Usuario creado!",
         "userUpdated": "¡Usuario actualizado!",
         "urlCreated": "¡Enlace creado!",
-        "urlUpdated": "¡Enlace actualizado!"
+        "urlUpdated": "¡Enlace actualizado!",
+        "ownerLabel": "Propietario",
+        "noOwner": "Sin propietario (anónimo)",
+        "confirmDeleteUser": "¿Desactivar al usuario {email}? Sus enlaces se mantendrán y quedarán vinculados a esta cuenta (ahora inactiva). Puedes reactivarla luego."
+    },
+    "expired": {
+        "title": "Enlace no encontrado",
+        "subtitle": "Este enlace no existe o ha expirado.",
+        "codeLabel": "Código",
+        "backHome": "Volver al inicio",
+        "createNew": "Crear un nuevo enlace"
     },
     "myLinks": {
         "pageTitle": "Mis Enlaces · OpenShortener",
