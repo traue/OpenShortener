@@ -68,8 +68,10 @@ final class Url
         $where = 'WHERE user_id = :uid';
         $bind = ['uid' => $userId];
         if ($hasSearch) {
-            $where .= ' AND (original_url LIKE :q OR short_code LIKE :q)';
-            $bind['q'] = '%' . $search . '%';
+            // Two separate placeholders — PDO with emulate_prepares=false rejects re-used names.
+            $where .= ' AND (original_url LIKE :q_url OR short_code LIKE :q_code)';
+            $bind['q_url']  = '%' . $search . '%';
+            $bind['q_code'] = '%' . $search . '%';
         }
 
         $total = (int) (function () use ($pdo, $where, $bind) {
@@ -94,8 +96,10 @@ final class Url
         $where = '';
         $bind = [];
         if ($hasSearch) {
-            $where = 'WHERE u.original_url LIKE :q OR u.short_code LIKE :q OR usr.email LIKE :q';
-            $bind['q'] = '%' . $search . '%';
+            $where = 'WHERE u.original_url LIKE :q_url OR u.short_code LIKE :q_code OR usr.email LIKE :q_email';
+            $bind['q_url']   = '%' . $search . '%';
+            $bind['q_code']  = '%' . $search . '%';
+            $bind['q_email'] = '%' . $search . '%';
         }
 
         $total = (int) (function () use ($pdo, $where, $bind) {

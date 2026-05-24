@@ -1,12 +1,14 @@
 /* OpenShortener service worker
- * - Cache-first for static assets (CSS, JS, fonts, icons, i18n)
- * - Network-first for HTML shells (so deploys are picked up quickly)
- * - Network-only for /api/*, /qr/*, and short-code redirects (anything else)
+ * - Network-first for HTML, JS, CSS, JSON (anything that evolves with a
+ *   deploy — old JS + stale i18n breaks the UI, so we always try the
+ *   network first and only fall back to cache when offline)
+ * - Cache-first for images, fonts, icons, manifest (rarely change)
+ * - Network-only for /api/*, /qr/*, and short-code redirects
  *
  * Bump CACHE_VERSION whenever the precache list changes so old caches are
  * cleaned up on the next activate.
  */
-const CACHE_VERSION = 'os-v3';
+const CACHE_VERSION = 'os-v4';
 const STATIC_CACHE  = 'os-static-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'os-runtime-' + CACHE_VERSION;
 
@@ -55,9 +57,16 @@ function isHtmlRequest(request) {
         (request.headers.get('accept') || '').includes('text/html');
 }
 
-function isStaticAsset(url) {
-    return /\.(css|js|png|jpg|jpeg|gif|svg|ico|webmanifest|woff2?|ttf)$/i.test(url.pathname) ||
-        url.pathname.startsWith('/i18n/');
+// Long-lived assets that almost never change between deploys.
+function isImmutableAsset(url) {
+    return /\.(png|jpg|jpeg|gif|svg|ico|webmanifest|woff2?|ttf)$/i.test(url.pathname);
+}
+
+// Deploy-coupled assets — must follow the same version as the HTML/JS
+// that references them. Stale copies of any of these break the UI
+// (e.g. old i18n + new JS shows raw keys).
+function isDeployAsset(url) {
+    return /\.(css|js|json)$/i.test(url.pathname) || url.pathname.startsWith('/i18n/');
 }
 
 self.addEventListener('fetch', (event) => {
@@ -72,12 +81,12 @@ self.addEventListener('fetch', (event) => {
     // Pass through API, QR, short-code redirects, and admin POST endpoints
     if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/qr/')) return;
 
-    if (isStaticAsset(url)) {
+    if (isImmutableAsset(url)) {
         event.respondWith(cacheFirst(request));
         return;
     }
 
-    if (isHtmlRequest(request)) {
+    if (isDeployAsset(url) || isHtmlRequest(request)) {
         event.respondWith(networkFirst(request));
     }
 });
