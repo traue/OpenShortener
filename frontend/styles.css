@@ -1199,6 +1199,7 @@ input:focus {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
+    table-layout: fixed;
 }
 
 .admin-table thead {
@@ -1235,20 +1236,58 @@ input:focus {
     width: 60px;
     color: var(--text-secondary);
     font-family: monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.col-url {
+    width: auto;
+    overflow: hidden;
 }
 
 .col-url a {
-    word-break: break-all;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: normal;
+}
+
+.col-short {
+    width: 240px;
+    overflow: hidden;
+}
+
+.col-short a {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .col-date {
+    width: 140px;
     white-space: nowrap;
     color: var(--text-secondary);
     font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.col-clicks {
+    width: 80px;
+}
+
+.col-actions {
+    width: 160px;
 }
 
 .col-owner {
+    width: 180px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-family: monospace;
     color: var(--text-secondary);
 }
@@ -1741,6 +1780,20 @@ input:focus {
 
     .admin-table tbody td.col-clicks {
         text-align: left;
+    }
+
+    /* In stacked-card mode let URLs wrap instead of truncating */
+    .admin-table tbody td.col-url {
+        max-width: none;
+    }
+
+    .admin-table tbody td.col-url a {
+        display: inline;
+        max-width: none;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+        word-break: break-all;
     }
 
     .admin-table tbody td.col-actions {

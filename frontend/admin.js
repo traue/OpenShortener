@@ -522,12 +522,12 @@
             '<table class="admin-table" id="users-table">' +
                 '<thead><tr>' +
                     '<th class="col-check"><input type="checkbox" id="check-all-users"></th>' +
-                    '<th>ID</th>' +
+                    '<th class="col-id">ID</th>' +
                     '<th>' + escapeHtml(t('admin.colEmail')) + '</th>' +
                     '<th>' + escapeHtml(t('admin.colStatus')) + '</th>' +
-                    '<th>' + escapeHtml(t('admin.colLinks')) + '</th>' +
-                    '<th>' + escapeHtml(t('admin.colCreated')) + '</th>' +
-                    '<th>' + escapeHtml(t('admin.colActions')) + '</th>' +
+                    '<th class="col-clicks">' + escapeHtml(t('admin.colLinks')) + '</th>' +
+                    '<th class="col-date">' + escapeHtml(t('admin.colCreated')) + '</th>' +
+                    '<th class="col-actions">' + escapeHtml(t('admin.colActions')) + '</th>' +
                 '</tr></thead>' +
                 '<tbody id="users-tbody"></tbody>' +
             '</table>';
@@ -542,14 +542,14 @@
             '<table class="admin-table" id="urls-table">' +
                 '<thead><tr>' +
                     '<th class="col-check"><input type="checkbox" id="check-all-urls"></th>' +
-                    '<th>ID</th>' +
-                    '<th>' + escapeHtml(t('admin.colOriginalUrl')) + '</th>' +
-                    '<th>' + escapeHtml(t('admin.colShortUrl')) + '</th>' +
-                    '<th>' + escapeHtml(t('admin.colOwner')) + '</th>' +
-                    '<th>' + escapeHtml(t('admin.colClicks')) + '</th>' +
-                    '<th>' + escapeHtml(t('admin.colExpires')) + '</th>' +
-                    '<th>' + escapeHtml(t('admin.colCreated')) + '</th>' +
-                    '<th>' + escapeHtml(t('admin.colActions')) + '</th>' +
+                    '<th class="col-id">ID</th>' +
+                    '<th class="col-url">' + escapeHtml(t('admin.colOriginalUrl')) + '</th>' +
+                    '<th class="col-short">' + escapeHtml(t('admin.colShortUrl')) + '</th>' +
+                    '<th class="col-owner">' + escapeHtml(t('admin.colOwner')) + '</th>' +
+                    '<th class="col-clicks">' + escapeHtml(t('admin.colClicks')) + '</th>' +
+                    '<th class="col-date">' + escapeHtml(t('admin.colExpires')) + '</th>' +
+                    '<th class="col-date">' + escapeHtml(t('admin.colCreated')) + '</th>' +
+                    '<th class="col-actions">' + escapeHtml(t('admin.colActions')) + '</th>' +
                 '</tr></thead>' +
                 '<tbody id="urls-tbody"></tbody>' +
             '</table>';
@@ -587,7 +587,7 @@
                         escapeHtml(u.original_url.length > 50 ? u.original_url.substring(0, 50) + '…' : u.original_url) +
                     '</a>' +
                 '</td>' +
-                '<td data-label="' + escapeHtml(t('admin.colShortUrl')) + '"><a href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener" class="short-link">' + escapeHtml(u.short_url) + '</a></td>' +
+                '<td class="col-short" data-label="' + escapeHtml(t('admin.colShortUrl')) + '"><a href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener" class="short-link" title="' + escapeHtml(u.short_url) + '">' + escapeHtml(u.short_url) + '</a></td>' +
                 '<td class="col-owner" data-label="' + escapeHtml(t('admin.colOwner')) + '">' + escapeHtml(owner) + '</td>' +
                 '<td class="col-clicks" data-label="' + escapeHtml(t('admin.colClicks')) + '">' + u.clicks + '</td>' +
                 '<td class="col-date" data-label="' + escapeHtml(t('admin.colExpires')) + '">' + exp + '</td>' +

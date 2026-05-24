@@ -31,6 +31,55 @@
     RewriteRule ^([a-zA-Z0-9_-]+)$ /api/index.php [L,QSA]
 </IfModule>
 
+# ── Cache control ─────────────────────────────────────────
+# Service worker NUNCA pode ter cache (senão browsers seguram a versão antiga).
+<Files "sw.js">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </IfModule>
+</Files>
+
+# Webmanifest revalida sempre
+<Files "site.webmanifest">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache"
+    </IfModule>
+</Files>
+
+# Traduções i18n revalidam (para novas chaves chegarem aos usuários)
+<FilesMatch "^.*\.json$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache"
+    </IfModule>
+</FilesMatch>
+
+# CSS e JS revalidam em todo load (304 quando nada mudou — barato)
+<FilesMatch "\.(css|js)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "public, max-age=0, must-revalidate"
+    </IfModule>
+</FilesMatch>
+
+# A regra acima recobre sw.js — força no-cache de novo pra ele
+<Files "sw.js">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </IfModule>
+</Files>
+
+# Imagens e fontes têm cache longo (raramente mudam)
+<FilesMatch "\.(png|jpg|jpeg|gif|ico|svg|woff2?|ttf)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "public, max-age=2592000"
+    </IfModule>
+    <IfModule mod_expires.c>
+        ExpiresActive On
+        ExpiresDefault "access plus 30 days"
+    </IfModule>
+</FilesMatch>
+
 # Bloquear acesso a arquivos sensíveis (exceto i18n/*.json)
 <FilesMatch "\.(env|md|log)$">
     Order allow,deny

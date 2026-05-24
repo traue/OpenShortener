@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '/<table class=\"admin-table\" id=\"urls-table\">/,/<\\\\/table>/' /Users/thiagotraue/repositorios/OpenShortener/frontend/admin.html)",
+      "Bash(curl -s http://localhost:8080/admin)",
+      "Bash(curl -s http://localhost:8080/admin > /tmp/served-admin.html && diff /tmp/served-admin.html /Users/thiagotraue/repositorios/OpenShortener/frontend/admin.html | head -20)",
+      "Read(//tmp/**)",
+      "Bash(docker compose *)",
+      "Bash(curl -s http://localhost:8080/styles.css)"
+    ]
+  }
+}

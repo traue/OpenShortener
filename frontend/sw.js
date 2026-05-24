@@ -6,7 +6,7 @@
  * Bump CACHE_VERSION whenever the precache list changes so old caches are
  * cleaned up on the next activate.
  */
-const CACHE_VERSION = 'os-v1';
+const CACHE_VERSION = 'os-v3';
 const STATIC_CACHE  = 'os-static-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'os-runtime-' + CACHE_VERSION;
 
