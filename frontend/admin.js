@@ -587,7 +587,7 @@
                         escapeHtml(u.original_url.length > 50 ? u.original_url.substring(0, 50) + '…' : u.original_url) +
                     '</a>' +
                 '</td>' +
-                '<td class="col-short" data-label="' + escapeHtml(t('admin.colShortUrl')) + '"><a href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener" class="short-link" title="' + escapeHtml(u.short_url) + '">' + escapeHtml(u.short_url) + '</a></td>' +
+                '<td class="col-short" data-label="' + escapeHtml(t('admin.colShortUrl')) + '"><a href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener" class="short-link" title="' + escapeHtml(u.short_url) + '">' + escapeHtml(u.short_code) + '</a></td>' +
                 '<td class="col-owner" data-label="' + escapeHtml(t('admin.colOwner')) + '">' + escapeHtml(owner) + '</td>' +
                 '<td class="col-clicks" data-label="' + escapeHtml(t('admin.colClicks')) + '">' + u.clicks + '</td>' +
                 '<td class="col-date" data-label="' + escapeHtml(t('admin.colExpires')) + '">' + exp + '</td>' +
