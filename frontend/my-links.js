@@ -142,14 +142,101 @@
         return data;
     }
 
-    // ── Toast ────────────────────────────────────────────────
-    function toast(msg, duration) {
+    // ── Toast (variants) ─────────────────────────────────────
+    var TOAST_ICONS = { success: '✓', error: '✕', info: 'ℹ' };
+    function toast(msg, duration, type) {
         duration = duration || 2500;
+        type = type || 'info';
         var el = document.createElement('div');
-        el.className = 'toast';
-        el.textContent = msg;
+        el.className = 'toast toast-' + type;
+        el.innerHTML = '<span class="toast-icon">' + (TOAST_ICONS[type] || '') + '</span><span></span>';
+        el.querySelector('span:last-child').textContent = msg;
         document.body.appendChild(el);
-        setTimeout(function () { el.remove(); }, duration);
+        setTimeout(function () {
+            el.classList.add('toast-leaving');
+            setTimeout(function () { el.remove(); }, 200);
+        }, duration);
+    }
+
+    // ── Confirm dialog ───────────────────────────────────────
+    function confirmDialog(opts) {
+        opts = opts || {};
+        return new Promise(function (resolve) {
+            var modal = document.createElement('div');
+            modal.className = 'confirm-modal';
+            var iconClass = opts.danger === false ? 'confirm-modal-icon info' : 'confirm-modal-icon';
+            var icon = opts.danger === false ? 'ℹ' : '⚠';
+            var confirmClass = opts.danger === false ? 'btn-primary' : 'btn-danger';
+            var confirmLabel = opts.confirmText || t('common.confirm');
+            var cancelLabel = opts.cancelText || t('common.cancel');
+            modal.innerHTML =
+                '<div class="confirm-modal-backdrop"></div>' +
+                '<div class="confirm-modal-card" role="dialog" aria-modal="true">' +
+                    '<div class="' + iconClass + '">' + icon + '</div>' +
+                    '<h3 class="confirm-modal-title"></h3>' +
+                    '<p class="confirm-modal-message"></p>' +
+                    '<div class="confirm-modal-actions">' +
+                        '<button type="button" class="btn-secondary" data-act="cancel"></button>' +
+                        '<button type="button" class="' + confirmClass + '" data-act="confirm" style="padding:0.6rem 1.1rem"></button>' +
+                    '</div>' +
+                '</div>';
+            modal.querySelector('.confirm-modal-title').textContent = opts.title || t('common.areYouSure');
+            if (opts.message) modal.querySelector('.confirm-modal-message').textContent = opts.message;
+            else modal.querySelector('.confirm-modal-message').style.display = 'none';
+            modal.querySelector('[data-act="cancel"]').textContent = cancelLabel;
+            modal.querySelector('[data-act="confirm"]').textContent = confirmLabel;
+
+            document.body.appendChild(modal);
+            var confirmBtn = modal.querySelector('[data-act="confirm"]');
+            confirmBtn.focus();
+
+            function close(result) {
+                modal.remove();
+                document.removeEventListener('keydown', onKey);
+                resolve(result);
+            }
+            function onKey(e) {
+                if (e.key === 'Escape') close(false);
+                else if (e.key === 'Enter') close(true);
+            }
+            modal.querySelector('.confirm-modal-backdrop').addEventListener('click', function () { close(false); });
+            modal.querySelector('[data-act="cancel"]').addEventListener('click', function () { close(false); });
+            confirmBtn.addEventListener('click', function () { close(true); });
+            document.addEventListener('keydown', onKey);
+        });
+    }
+
+    // ── Skeleton loader ──────────────────────────────────────
+    function renderSkeletonCards(count) {
+        count = count || 4;
+        var html = '';
+        for (var i = 0; i < count; i++) {
+            html += '<div class="skeleton-card">' +
+                '<div class="skeleton-line med"></div>' +
+                '<div class="skeleton-line long"></div>' +
+                '<div class="skeleton-line short"></div>' +
+            '</div>';
+        }
+        mylinksList.innerHTML = html;
+    }
+
+    // ── Empty state (SVG) ────────────────────────────────────
+    var EMPTY_SVG =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M40 56l-8 8a14 14 0 1 1-20-20l12-12a14 14 0 0 1 20 0"/>' +
+            '<path d="M56 40l8-8a14 14 0 1 1 20 20L72 64a14 14 0 0 1-20 0"/>' +
+            '<path d="M36 60l24-24" stroke-dasharray="4 4"/>' +
+        '</svg>';
+
+    function renderEmptyState(filtered) {
+        var titleKey = filtered ? 'empty.noLinksFilteredTitle' : 'empty.noLinksTitle';
+        var descKey  = filtered ? 'empty.noLinksFilteredDesc'  : 'empty.noLinksDesc';
+        mylinksList.innerHTML =
+            '<div class="empty-state">' +
+                '<div class="empty-state-icon">' + EMPTY_SVG + '</div>' +
+                '<h3 class="empty-state-title">' + escapeHtml(t(titleKey)) + '</h3>' +
+                '<p class="empty-state-desc">' + escapeHtml(t(descKey)) + '</p>' +
+            '</div>';
     }
 
     // ── Escape helpers ───────────────────────────────────────
@@ -196,7 +283,7 @@
         try {
             await api('PUT', '/password', { current_password: currentPw, new_password: newPw });
             passwordModal.classList.add('hidden'); passwordForm.reset();
-            toast(t('toast.passwordChanged'));
+            toast(t('toast.passwordChanged'), 2500, 'success');
         } catch (err) { passwordError.textContent = err.message; passwordError.classList.remove('hidden'); }
     });
     $$('[data-close-password]').forEach(function (el) {
@@ -210,7 +297,12 @@
     }
 
     // ── Load My URLs ─────────────────────────────────────────
+    var firstLoad = true;
     async function loadMyUrls() {
+        if (firstLoad) {
+            renderSkeletonCards(3);
+            firstLoad = false;
+        }
         try {
             var qs = '?page=' + currentPage + '&per_page=' + perPage;
             if (currentSearch) qs += '&q=' + encodeURIComponent(currentSearch);
@@ -219,7 +311,10 @@
             totalUrls = resp.total || 0;
             renderMyUrls(allUrls);
             renderPagination();
-        } catch (_) {}
+        } catch (err) {
+            mylinksList.innerHTML = '';
+            toast(err.message, 4000, 'error');
+        }
     }
 
     function renderPagination() {
@@ -241,7 +336,7 @@
 
     function renderMyUrls(urls) {
         if (!urls.length) {
-            mylinksList.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem 0">' + escapeHtml(t('myUrls.empty')) + '</p>';
+            renderEmptyState(!!currentSearch);
             return;
         }
 
@@ -249,6 +344,7 @@
             var exp = u.expires_at
                 ? '<span class="badge">⏱ ' + escapeHtml(t('myUrls.expires')) + ' ' + escapeHtml(formatLocalDateTime(u.expires_at)) + '</span>'
                 : '<span class="badge">∞ ' + escapeHtml(t('myUrls.noExpiration')) + '</span>';
+            var shortCode = (u.short_url || '').split('/').pop();
             return '<div class="url-card" data-id="' + u.id + '">' +
                 '<div class="url-card-info">' +
                     '<a class="short" href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener">' + escapeHtml(u.short_url) + '</a>' +
@@ -257,7 +353,7 @@
                 '</div>' +
                 '<div class="url-card-actions">' +
                     '<button class="btn-icon-sm" onclick="window.__copyUrl(\'' + escapeHtml(u.short_url) + '\')" title="' + escapeHtml(t('myUrls.copyBtn')) + '">📋</button>' +
-                    '<button class="btn-icon-sm" onclick="window.__editUrl(' + u.id + ', \'' + escapeAttr(u.original_url) + '\')" title="' + escapeHtml(t('myUrls.editBtn')) + '">✏️</button>' +
+                    '<button class="btn-icon-sm" onclick="window.__editUrl(' + u.id + ', \'' + escapeAttr(u.original_url) + '\', \'' + escapeAttr(shortCode) + '\')" title="' + escapeHtml(t('myUrls.editBtn')) + '">✏️</button>' +
                     '<button class="btn-icon-sm" onclick="window.__showQr(\'' + escapeHtml(u.short_url) + '\')" title="' + escapeHtml(t('myUrls.qrBtn')) + '">📱</button>' +
                     '<button class="btn-icon-sm" onclick="window.__showStats(' + u.id + ')" title="' + escapeHtml(t('myLinks.statsBtn')) + '">📊</button>' +
                     '<button class="btn-icon-sm danger" onclick="window.__deleteUrl(' + u.id + ')" title="' + escapeHtml(t('myUrls.deleteBtn')) + '">🗑️</button>' +
@@ -278,28 +374,49 @@
 
     // ── Global actions ───────────────────────────────────────
     window.__copyUrl = function (url) {
-        navigator.clipboard.writeText(url).then(function () { toast(t('toast.copied')); });
+        navigator.clipboard.writeText(url).then(function () { toast(t('toast.copied'), 2500, 'success'); });
     };
 
-    window.__editUrl = function (id, currentUrl) {
+    window.__editUrl = function (id, currentUrl, currentAlias) {
         var card = document.querySelector('.url-card[data-id="' + id + '"]');
         if (!card || card.querySelector('.edit-inline')) return;
         var editDiv = document.createElement('div');
         editDiv.className = 'edit-inline';
         editDiv.innerHTML =
-            '<div style="display:flex;gap:0.5rem;margin-top:0.5rem;width:100%">' +
-                '<input type="url" class="edit-url-input" value="' + escapeAttr(currentUrl) + '" placeholder="' + escapeHtml(t('myUrls.editUrlPlaceholder')) + '" style="flex:1">' +
-                '<button class="btn-primary btn-small edit-save-btn">' + escapeHtml(t('myUrls.editSave')) + '</button>' +
-                '<button class="btn-secondary btn-small edit-cancel-btn">' + escapeHtml(t('myUrls.editCancel')) + '</button>' +
-            '</div>';
+            '<form class="edit-inline-form" novalidate>' +
+                '<div class="edit-inline-field">' +
+                    '<label>' + escapeHtml(t('myUrls.editUrlLabel')) + '</label>' +
+                    '<input type="url" class="edit-url-input" value="' + escapeAttr(currentUrl) + '" placeholder="' + escapeHtml(t('myUrls.editUrlPlaceholder')) + '" required>' +
+                '</div>' +
+                '<div class="edit-inline-field">' +
+                    '<label>' + escapeHtml(t('myUrls.editAliasLabel')) + '</label>' +
+                    '<input type="text" class="edit-alias-input" value="' + escapeAttr(currentAlias || '') + '" placeholder="' + escapeHtml(t('myUrls.editAliasPlaceholder')) + '" pattern="[a-zA-Z0-9_\\-]+">' +
+                    '<small class="form-hint" style="margin-top:0.15rem">' + escapeHtml(t('myUrls.editAliasHint')) + '</small>' +
+                '</div>' +
+                '<div class="edit-inline-actions">' +
+                    '<button type="button" class="btn-secondary btn-small edit-cancel-btn">' + escapeHtml(t('myUrls.editCancel')) + '</button>' +
+                    '<button type="submit" class="btn-primary btn-small edit-save-btn">' + escapeHtml(t('myUrls.editSave')) + '</button>' +
+                '</div>' +
+            '</form>';
         card.appendChild(editDiv);
-        var input = editDiv.querySelector('.edit-url-input');
-        input.focus(); input.select();
-        editDiv.querySelector('.edit-save-btn').addEventListener('click', async function () {
-            var newUrl = input.value.trim();
+        var urlInput = editDiv.querySelector('.edit-url-input');
+        var aliasInput = editDiv.querySelector('.edit-alias-input');
+        urlInput.focus(); urlInput.select();
+
+        editDiv.querySelector('form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            var newUrl = urlInput.value.trim();
+            var newAlias = aliasInput.value.trim();
             if (!newUrl) return;
-            try { await api('PUT', '/urls/' + id, { url: newUrl }); toast(t('toast.updated')); loadMyUrls(); }
-            catch (err) { toast(err.message, 4000); }
+            var body = { url: newUrl };
+            if (newAlias && newAlias !== (currentAlias || '')) body.alias = newAlias;
+            try {
+                await api('PUT', '/urls/' + id, body);
+                toast(t('toast.updated'), 2500, 'success');
+                loadMyUrls();
+            } catch (err) {
+                toast(err.message, 4000, 'error');
+            }
         });
         editDiv.querySelector('.edit-cancel-btn').addEventListener('click', function () { editDiv.remove(); });
     };
@@ -310,9 +427,14 @@
     };
 
     window.__deleteUrl = async function (id) {
-        if (!confirm(t('myUrls.confirmDelete'))) return;
-        try { await api('DELETE', '/urls/' + id); toast(t('toast.deleted')); loadMyUrls(); }
-        catch (err) { toast(err.message, 4000); }
+        var ok = await confirmDialog({
+            title: t('myUrls.confirmDelete'),
+            message: t('myUrls.confirmDeleteDesc'),
+            confirmText: t('common.delete')
+        });
+        if (!ok) return;
+        try { await api('DELETE', '/urls/' + id); toast(t('toast.deleted'), 2500, 'success'); loadMyUrls(); }
+        catch (err) { toast(err.message, 4000, 'error'); }
     };
 
     // ── Stats Modal ──────────────────────────────────────────
@@ -322,7 +444,7 @@
             renderStats(data);
             statsModal.classList.remove('hidden');
         } catch (err) {
-            toast(err.message, 4000);
+            toast(err.message, 4000, 'error');
         }
     };
 
@@ -358,6 +480,32 @@
                 return '<li><span class="ref-name">' + escapeHtml(r.referer) + '</span><span class="ref-count">' + r.count + '</span></li>';
             }).join('');
         }
+    }
+
+    // ── Online / offline indicator ───────────────────────────
+    var offlineBanner = null;
+    function showOfflineBanner() {
+        if (offlineBanner) return;
+        offlineBanner = document.createElement('div');
+        offlineBanner.className = 'offline-banner';
+        offlineBanner.textContent = t('toast.offline');
+        document.body.appendChild(offlineBanner);
+    }
+    function hideOfflineBanner() {
+        if (!offlineBanner) return;
+        offlineBanner.remove();
+        offlineBanner = null;
+        toast(t('toast.backOnline'), 2000, 'success');
+    }
+    window.addEventListener('online',  hideOfflineBanner);
+    window.addEventListener('offline', showOfflineBanner);
+    if (!navigator.onLine) showOfflineBanner();
+
+    // ── Service worker ───────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function () { /* ignore */ });
+        });
     }
 
     // ── Init ─────────────────────────────────────────────────

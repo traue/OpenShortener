@@ -192,14 +192,20 @@
         return data;
     }
 
-    // ── Toast ────────────────────────────────────────────────
-    function toast(msg, duration) {
+    // ── Toast (variants) ─────────────────────────────────────
+    var TOAST_ICONS = { success: '✓', error: '✕', info: 'ℹ' };
+    function toast(msg, duration, type) {
         duration = duration || 2500;
+        type = type || 'info';
         var el = document.createElement('div');
-        el.className = 'toast';
-        el.textContent = msg;
+        el.className = 'toast toast-' + type;
+        el.innerHTML = '<span class="toast-icon">' + (TOAST_ICONS[type] || '') + '</span><span></span>';
+        el.querySelector('span:last-child').textContent = msg;
         document.body.appendChild(el);
-        setTimeout(function () { el.remove(); }, duration);
+        setTimeout(function () {
+            el.classList.add('toast-leaving');
+            setTimeout(function () { el.remove(); }, 200);
+        }, duration);
     }
 
     // ── Auth UI ──────────────────────────────────────────────
@@ -255,7 +261,7 @@
             authModal.classList.add('hidden');
             loginForm.reset();
             renderAuthArea();
-            toast(t('toast.loginSuccess'));
+            toast(t('toast.loginSuccess'), 2500, 'success');
         } catch (err) {
             loginError.textContent = err.message;
             loginError.classList.remove('hidden');
@@ -274,7 +280,7 @@
             authModal.classList.add('hidden');
             registerForm.reset();
             renderAuthArea();
-            toast(t('toast.registerSuccess'));
+            toast(t('toast.registerSuccess'), 2500, 'success');
         } catch (err) {
             registerError.textContent = err.message;
             registerError.classList.remove('hidden');
@@ -297,7 +303,7 @@
             await api('PUT', '/password', { current_password: currentPw, new_password: newPw });
             passwordModal.classList.add('hidden');
             passwordForm.reset();
-            toast(t('toast.passwordChanged'));
+            toast(t('toast.passwordChanged'), 2500, 'success');
         } catch (err) {
             passwordError.textContent = err.message;
             passwordError.classList.remove('hidden');
@@ -309,7 +315,7 @@
         try { await api('POST', '/logout'); } catch (_) { /* ignore */ }
         currentUser = null;
         renderAuthArea();
-        toast(t('toast.logoutSuccess'));
+        toast(t('toast.logoutSuccess'), 2500, 'info');
     }
 
     // ── Captcha (Turnstile) ──────────────────────────────────
@@ -380,7 +386,7 @@
 
             if (res.status === 428 && data.captcha_required) {
                 renderCaptcha(data.site_key || captchaSiteKey);
-                toast(t('toast.captchaRequired'), 4000);
+                toast(t('toast.captchaRequired'), 4000, 'info');
                 return;
             }
             if (!res.ok) {
@@ -393,14 +399,14 @@
             resultDiv.classList.remove('hidden');
             resetCaptcha();
         } catch (err) {
-            toast(err.message, 4000);
+            toast(err.message, 4000, 'error');
         }
     });
 
     // ── Copy ─────────────────────────────────────────────────
     copyBtn.addEventListener('click', function () {
         var text = shortUrlA.textContent;
-        navigator.clipboard.writeText(text).then(function () { toast(t('toast.copied')); });
+        navigator.clipboard.writeText(text).then(function () { toast(t('toast.copied'), 2500, 'success'); });
     });
 
     // ── Escape HTML helper ───────────────────────────────────
@@ -422,6 +428,32 @@
         } catch (_) {
             currentUser = null;
         }
+    }
+
+    // ── Online / offline indicator ───────────────────────────
+    var offlineBanner = null;
+    function showOfflineBanner() {
+        if (offlineBanner) return;
+        offlineBanner = document.createElement('div');
+        offlineBanner.className = 'offline-banner';
+        offlineBanner.textContent = t('toast.offline');
+        document.body.appendChild(offlineBanner);
+    }
+    function hideOfflineBanner() {
+        if (!offlineBanner) return;
+        offlineBanner.remove();
+        offlineBanner = null;
+        toast(t('toast.backOnline'), 2000, 'success');
+    }
+    window.addEventListener('online',  hideOfflineBanner);
+    window.addEventListener('offline', showOfflineBanner);
+    if (!navigator.onLine) showOfflineBanner();
+
+    // ── Service worker ───────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function () { /* ignore */ });
+        });
     }
 
     // ── Init ─────────────────────────────────────────────────

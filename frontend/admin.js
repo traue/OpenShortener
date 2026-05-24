@@ -175,14 +175,142 @@
         return data;
     }
 
-    // ── Toast ────────────────────────────────────────────────
-    function toast(msg, duration) {
+    // ── Toast (variants) ─────────────────────────────────────
+    var TOAST_ICONS = { success: '✓', error: '✕', info: 'ℹ' };
+    function toast(msg, duration, type) {
         duration = duration || 2500;
+        type = type || 'info';
         var el = document.createElement('div');
-        el.className = 'toast';
-        el.textContent = msg;
+        el.className = 'toast toast-' + type;
+        el.innerHTML = '<span class="toast-icon">' + (TOAST_ICONS[type] || '') + '</span><span></span>';
+        el.querySelector('span:last-child').textContent = msg;
         document.body.appendChild(el);
-        setTimeout(function () { el.remove(); }, duration);
+        setTimeout(function () {
+            el.classList.add('toast-leaving');
+            setTimeout(function () { el.remove(); }, 200);
+        }, duration);
+    }
+
+    // ── Confirm dialog ───────────────────────────────────────
+    function confirmDialog(opts) {
+        opts = opts || {};
+        return new Promise(function (resolve) {
+            var modal = document.createElement('div');
+            modal.className = 'confirm-modal';
+            var iconClass = opts.danger === false ? 'confirm-modal-icon info' : 'confirm-modal-icon';
+            var icon = opts.danger === false ? 'ℹ' : '⚠';
+            var confirmClass = opts.danger === false ? 'btn-primary' : 'btn-danger';
+            var confirmLabel = opts.confirmText || t('common.confirm');
+            var cancelLabel = opts.cancelText || t('common.cancel');
+            modal.innerHTML =
+                '<div class="confirm-modal-backdrop"></div>' +
+                '<div class="confirm-modal-card" role="dialog" aria-modal="true">' +
+                    '<div class="' + iconClass + '">' + icon + '</div>' +
+                    '<h3 class="confirm-modal-title"></h3>' +
+                    '<p class="confirm-modal-message"></p>' +
+                    '<div class="confirm-modal-actions">' +
+                        '<button type="button" class="btn-secondary" data-act="cancel"></button>' +
+                        '<button type="button" class="' + confirmClass + '" data-act="confirm" style="padding:0.6rem 1.1rem"></button>' +
+                    '</div>' +
+                '</div>';
+            modal.querySelector('.confirm-modal-title').textContent = opts.title || t('common.areYouSure');
+            if (opts.message) modal.querySelector('.confirm-modal-message').textContent = opts.message;
+            else modal.querySelector('.confirm-modal-message').style.display = 'none';
+            modal.querySelector('[data-act="cancel"]').textContent = cancelLabel;
+            modal.querySelector('[data-act="confirm"]').textContent = confirmLabel;
+
+            document.body.appendChild(modal);
+            var confirmBtn = modal.querySelector('[data-act="confirm"]');
+            confirmBtn.focus();
+
+            function close(result) {
+                modal.remove();
+                document.removeEventListener('keydown', onKey);
+                resolve(result);
+            }
+            function onKey(e) {
+                if (e.key === 'Escape') close(false);
+                else if (e.key === 'Enter') close(true);
+            }
+            modal.querySelector('.confirm-modal-backdrop').addEventListener('click', function () { close(false); });
+            modal.querySelector('[data-act="cancel"]').addEventListener('click', function () { close(false); });
+            confirmBtn.addEventListener('click', function () { close(true); });
+            document.addEventListener('keydown', onKey);
+        });
+    }
+
+    // ── Skeleton rows for admin tables ───────────────────────
+    function renderSkeletonRows(tbody, columnCount, rows) {
+        rows = rows || 4;
+        var cells = '';
+        for (var c = 0; c < columnCount; c++) {
+            cells += '<td><div class="skeleton-line ' + (c === 1 ? 'long' : c === 0 ? 'short' : 'med') + '"></div></td>';
+        }
+        var html = '';
+        for (var i = 0; i < rows; i++) html += '<tr class="skeleton-row">' + cells + '</tr>';
+        tbody.innerHTML = html;
+    }
+
+    // ── Empty state ──────────────────────────────────────────
+    var EMPTY_LINK_SVG =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M40 56l-8 8a14 14 0 1 1-20-20l12-12a14 14 0 0 1 20 0"/>' +
+            '<path d="M56 40l8-8a14 14 0 1 1 20 20L72 64a14 14 0 0 1-20 0"/>' +
+            '<path d="M36 60l24-24" stroke-dasharray="4 4"/>' +
+        '</svg>';
+    var EMPTY_USER_SVG =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<circle cx="48" cy="36" r="14"/>' +
+            '<path d="M20 80c0-14 12-24 28-24s28 10 28 24"/>' +
+        '</svg>';
+
+    function renderEmptyState(el, svg, title, desc) {
+        el.innerHTML =
+            '<div class="empty-state">' +
+                '<div class="empty-state-icon">' + svg + '</div>' +
+                '<h3 class="empty-state-title">' + escapeHtml(title) + '</h3>' +
+                '<p class="empty-state-desc">' + escapeHtml(desc) + '</p>' +
+            '</div>';
+    }
+
+    // ── Bulk selection state ─────────────────────────────────
+    var selectedUsers = new Set();
+    var selectedUrls  = new Set();
+
+    function clearSelection(kind) {
+        if (kind === 'users') selectedUsers.clear();
+        if (kind === 'urls')  selectedUrls.clear();
+        renderBulkBar();
+    }
+
+    // ── Export helpers ───────────────────────────────────────
+    function toCsv(rows) {
+        if (!rows.length) return '';
+        var headers = Object.keys(rows[0]);
+        var esc = function (v) {
+            if (v === null || v === undefined) return '';
+            var s = String(v);
+            if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+            return s;
+        };
+        var lines = [headers.map(esc).join(',')];
+        rows.forEach(function (r) { lines.push(headers.map(function (h) { return esc(r[h]); }).join(',')); });
+        return lines.join('\r\n');
+    }
+
+    function downloadBlob(content, mime, filename) {
+        var blob = new Blob([content], { type: mime + ';charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    }
+
+    function timestamp() {
+        var d = new Date(), pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+        return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' +
+               pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
     }
 
     // ── Escape helpers ───────────────────────────────────────
@@ -257,7 +385,7 @@
         usersData = [];
         urlsData = [];
         showLogin();
-        toast(t('toast.logoutSuccess'));
+        toast(t('toast.logoutSuccess'), 2500, 'info');
     }
 
     // ── Check existing session ───────────────────────────────
@@ -275,6 +403,8 @@
 
     // ── Load data ────────────────────────────────────────────
     async function loadAllData() {
+        renderSkeletonRows(usersTbody, 7, 4);
+        renderSkeletonRows(urlsTbody,  9, 4);
         await Promise.all([loadUsers(), loadUrls()]);
     }
 
@@ -282,10 +412,14 @@
         try {
             usersData = await api('GET', '/admin/users');
             usersCount.textContent = usersData.length;
+            // Drop selections that no longer exist
+            var ids = new Set(usersData.map(function (u) { return Number(u.id); }));
+            selectedUsers.forEach(function (id) { if (!ids.has(id)) selectedUsers.delete(id); });
             renderUsersTable(usersData);
+            renderBulkBar();
         } catch (err) {
             if (err.message === 'Unauthorized') { showLogin(); return; }
-            toast(err.message, 4000);
+            toast(err.message, 4000, 'error');
         }
     }
 
@@ -297,11 +431,14 @@
             urlsData = resp.data || [];
             urlsTotal = resp.total || 0;
             urlsCount.textContent = urlsTotal;
+            var ids = new Set(urlsData.map(function (u) { return Number(u.id); }));
+            selectedUrls.forEach(function (id) { if (!ids.has(id)) selectedUrls.delete(id); });
             renderUrlsTable(urlsData);
             renderUrlsPagination();
+            renderBulkBar();
         } catch (err) {
             if (err.message === 'Unauthorized') { showLogin(); return; }
-            toast(err.message, 4000);
+            toast(err.message, 4000, 'error');
         }
     }
 
@@ -325,11 +462,20 @@
     // ── Render Users ─────────────────────────────────────────
     function renderUsersTable(users) {
         if (!users.length) {
-            usersEmpty.classList.remove('hidden');
-            usersTbody.innerHTML = '';
+            usersEmpty.classList.add('hidden');
+            var filtered = usersSearch.value.trim() !== '';
+            renderEmptyState(
+                usersTbody.parentElement, // .admin-table-wrap
+                EMPTY_USER_SVG,
+                filtered ? t('empty.noUsersTitle') : t('admin.noUsers'),
+                filtered ? t('empty.noUsersDesc') : ''
+            );
             return;
         }
         usersEmpty.classList.add('hidden');
+
+        // Make sure the table is back (might have been replaced by empty state)
+        ensureUsersTableMounted();
 
         usersTbody.innerHTML = users.map(function (u) {
             var isActive = Number(u.is_active) === 1;
@@ -342,6 +488,11 @@
             var adminBadge = isAdmin ? ' <span class="status-badge status-admin">Admin</span>' : '';
             var selfLabel = isSelf ? ' <span style="color:var(--text-secondary);font-size:0.75rem">(' + escapeHtml(t('admin.youLabel')) + ')</span>' : '';
             var linkCount = u.link_count !== undefined ? u.link_count : '—';
+            var checked = selectedUsers.has(Number(u.id)) ? ' checked' : '';
+            var rowClass = checked ? ' class="row-selected"' : '';
+            var checkboxCell = isSelf
+                ? '<td class="col-check"></td>'
+                : '<td class="col-check"><input type="checkbox" class="row-check" data-kind="users" data-id="' + u.id + '"' + checked + '></td>';
 
             var actions = '<button class="btn-icon-sm" onclick="window.__editUserModal(' + u.id + ')" title="' + escapeHtml(t('admin.editBtn')) + '">✏️</button>';
             actions += '<button class="btn-icon-sm" onclick="window.__viewUserLinks(' + u.id + ', \'' + escapeHtml(u.email).replace(/'/g, "\\'") + '\')" title="' + escapeHtml(t('admin.viewLinksBtn')) + '">🔗</button>';
@@ -350,42 +501,97 @@
                 actions += '<button class="btn-icon-sm danger" onclick="window.__deleteUser(' + u.id + ', \'' + escapeHtml(u.email).replace(/'/g, "\\'") + '\')" title="' + escapeHtml(t('admin.deleteBtn')) + '">🗑️</button>';
             }
 
-            return '<tr>' +
-                '<td class="col-id">' + u.id + '</td>' +
-                '<td>' + escapeHtml(u.email) + adminBadge + selfLabel + '</td>' +
-                '<td><span class="status-badge ' + statusClass + '">' + escapeHtml(statusText) + '</span></td>' +
-                '<td class="col-clicks">' + linkCount + '</td>' +
-                '<td class="col-date">' + formatDate(u.created_at) + '</td>' +
+            return '<tr' + rowClass + '>' +
+                checkboxCell +
+                '<td class="col-id" data-label="ID">' + u.id + '</td>' +
+                '<td data-label="' + escapeHtml(t('admin.colEmail')) + '">' + escapeHtml(u.email) + adminBadge + selfLabel + '</td>' +
+                '<td data-label="' + escapeHtml(t('admin.colStatus')) + '"><span class="status-badge ' + statusClass + '">' + escapeHtml(statusText) + '</span></td>' +
+                '<td class="col-clicks" data-label="' + escapeHtml(t('admin.colLinks')) + '">' + linkCount + '</td>' +
+                '<td class="col-date" data-label="' + escapeHtml(t('admin.colCreated')) + '">' + formatDate(u.created_at) + '</td>' +
                 '<td class="col-actions">' + actions + '</td>' +
             '</tr>';
         }).join('');
+
+        bindCheckboxes('users');
+    }
+
+    function ensureUsersTableMounted() {
+        var wrap = document.querySelector('#panel-users .admin-table-wrap');
+        if (!wrap || wrap.querySelector('#users-table')) return;
+        wrap.innerHTML =
+            '<table class="admin-table" id="users-table">' +
+                '<thead><tr>' +
+                    '<th class="col-check"><input type="checkbox" id="check-all-users"></th>' +
+                    '<th>ID</th>' +
+                    '<th>' + escapeHtml(t('admin.colEmail')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colStatus')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colLinks')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colCreated')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colActions')) + '</th>' +
+                '</tr></thead>' +
+                '<tbody id="users-tbody"></tbody>' +
+            '</table>';
+        usersTbody = $('#users-tbody');
+        bindCheckAll('users');
+    }
+
+    function ensureUrlsTableMounted() {
+        var wrap = document.querySelector('#panel-urls .admin-table-wrap');
+        if (!wrap || wrap.querySelector('#urls-table')) return;
+        wrap.innerHTML =
+            '<table class="admin-table" id="urls-table">' +
+                '<thead><tr>' +
+                    '<th class="col-check"><input type="checkbox" id="check-all-urls"></th>' +
+                    '<th>ID</th>' +
+                    '<th>' + escapeHtml(t('admin.colOriginalUrl')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colShortUrl')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colOwner')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colClicks')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colExpires')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colCreated')) + '</th>' +
+                    '<th>' + escapeHtml(t('admin.colActions')) + '</th>' +
+                '</tr></thead>' +
+                '<tbody id="urls-tbody"></tbody>' +
+            '</table>';
+        urlsTbody = $('#urls-tbody');
+        bindCheckAll('urls');
     }
 
     // ── Render URLs ──────────────────────────────────────────
     function renderUrlsTable(urls) {
         if (!urls.length) {
-            urlsEmpty.classList.remove('hidden');
-            urlsTbody.innerHTML = '';
+            urlsEmpty.classList.add('hidden');
+            var filtered = urlsSearch.value.trim() !== '';
+            renderEmptyState(
+                document.querySelector('#panel-urls .admin-table-wrap'),
+                EMPTY_LINK_SVG,
+                filtered ? t('empty.noLinksFilteredTitle') : t('empty.noAdminLinksTitle'),
+                filtered ? t('empty.noLinksFilteredDesc')  : t('empty.noAdminLinksDesc')
+            );
             return;
         }
         urlsEmpty.classList.add('hidden');
+        ensureUrlsTableMounted();
 
         urlsTbody.innerHTML = urls.map(function (u) {
             var exp = u.expires_at ? formatDateTime(u.expires_at) : '∞';
             var owner = u.owner_email ? escapeHtml(u.owner_email) : '—';
+            var checked = selectedUrls.has(Number(u.id)) ? ' checked' : '';
+            var rowClass = checked ? ' class="row-selected"' : '';
 
-            return '<tr>' +
-                '<td class="col-id">' + u.id + '</td>' +
-                '<td class="col-url">' +
+            return '<tr' + rowClass + '>' +
+                '<td class="col-check"><input type="checkbox" class="row-check" data-kind="urls" data-id="' + u.id + '"' + checked + '></td>' +
+                '<td class="col-id" data-label="ID">' + u.id + '</td>' +
+                '<td class="col-url" data-label="' + escapeHtml(t('admin.colOriginalUrl')) + '">' +
                     '<a href="' + escapeHtml(u.original_url) + '" target="_blank" rel="noopener" title="' + escapeHtml(u.original_url) + '">' +
                         escapeHtml(u.original_url.length > 50 ? u.original_url.substring(0, 50) + '…' : u.original_url) +
                     '</a>' +
                 '</td>' +
-                '<td><a href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener" class="short-link">' + escapeHtml(u.short_url) + '</a></td>' +
-                '<td class="col-owner">' + escapeHtml(owner) + '</td>' +
-                '<td class="col-clicks">' + u.clicks + '</td>' +
-                '<td class="col-date">' + exp + '</td>' +
-                '<td class="col-date">' + formatDate(u.created_at) + '</td>' +
+                '<td data-label="' + escapeHtml(t('admin.colShortUrl')) + '"><a href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener" class="short-link">' + escapeHtml(u.short_url) + '</a></td>' +
+                '<td class="col-owner" data-label="' + escapeHtml(t('admin.colOwner')) + '">' + escapeHtml(owner) + '</td>' +
+                '<td class="col-clicks" data-label="' + escapeHtml(t('admin.colClicks')) + '">' + u.clicks + '</td>' +
+                '<td class="col-date" data-label="' + escapeHtml(t('admin.colExpires')) + '">' + exp + '</td>' +
+                '<td class="col-date" data-label="' + escapeHtml(t('admin.colCreated')) + '">' + formatDate(u.created_at) + '</td>' +
                 '<td class="col-actions">' +
                     '<button class="btn-icon-sm" onclick="window.__editUrlModal(' + u.id + ')" title="' + escapeHtml(t('admin.editBtn')) + '">✏️</button>' +
                     '<button class="btn-icon-sm" onclick="window.__showAdminStats(' + u.id + ')" title="' + escapeHtml(t('admin.statsBtn')) + '">📊</button>' +
@@ -394,43 +600,187 @@
                 '</td>' +
             '</tr>';
         }).join('');
+
+        bindCheckboxes('urls');
+    }
+
+    // ── Checkbox wiring ──────────────────────────────────────
+    function bindCheckboxes(kind) {
+        var set = kind === 'users' ? selectedUsers : selectedUrls;
+        var tbody = kind === 'users' ? usersTbody : urlsTbody;
+        tbody.querySelectorAll('.row-check[data-kind="' + kind + '"]').forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                var id = Number(cb.getAttribute('data-id'));
+                if (cb.checked) set.add(id); else set.delete(id);
+                cb.closest('tr').classList.toggle('row-selected', cb.checked);
+                renderBulkBar();
+                syncCheckAll(kind);
+            });
+        });
+        syncCheckAll(kind);
+    }
+
+    function bindCheckAll(kind) {
+        var headerCheck = document.getElementById('check-all-' + kind);
+        if (!headerCheck) return;
+        headerCheck.addEventListener('change', function () {
+            var rows = (kind === 'users' ? usersTbody : urlsTbody)
+                .querySelectorAll('.row-check[data-kind="' + kind + '"]');
+            var set = kind === 'users' ? selectedUsers : selectedUrls;
+            rows.forEach(function (cb) {
+                var id = Number(cb.getAttribute('data-id'));
+                cb.checked = headerCheck.checked;
+                if (cb.checked) set.add(id); else set.delete(id);
+                cb.closest('tr').classList.toggle('row-selected', cb.checked);
+            });
+            renderBulkBar();
+        });
+    }
+
+    function syncCheckAll(kind) {
+        var headerCheck = document.getElementById('check-all-' + kind);
+        if (!headerCheck) return;
+        var rows = (kind === 'users' ? usersTbody : urlsTbody)
+            .querySelectorAll('.row-check[data-kind="' + kind + '"]');
+        if (!rows.length) { headerCheck.checked = false; headerCheck.indeterminate = false; return; }
+        var checked = 0;
+        rows.forEach(function (cb) { if (cb.checked) checked++; });
+        headerCheck.checked = checked > 0 && checked === rows.length;
+        headerCheck.indeterminate = checked > 0 && checked < rows.length;
+    }
+
+    // ── Bulk action bar ──────────────────────────────────────
+    function renderBulkBar() {
+        renderBulkBarFor('users', selectedUsers);
+        renderBulkBarFor('urls',  selectedUrls);
+    }
+
+    function renderBulkBarFor(kind, set) {
+        var panel = document.getElementById('panel-' + kind);
+        if (!panel) return;
+        var existing = panel.querySelector('.bulk-bar');
+        if (!set.size) {
+            if (existing) existing.remove();
+            return;
+        }
+        var label = t('admin.bulkSelected').replace('{n}', set.size);
+        var html =
+            '<div class="bulk-bar">' +
+                '<span class="bulk-bar-info">' + escapeHtml(label) + '</span>' +
+                '<div class="bulk-bar-actions">' +
+                    (kind === 'users'
+                        ? '<button class="btn-secondary btn-small" data-bulk-act="activate">' + escapeHtml(t('admin.bulkActivate')) + '</button>' +
+                          '<button class="btn-secondary btn-small" data-bulk-act="block">' + escapeHtml(t('admin.bulkBlock')) + '</button>'
+                        : '') +
+                    '<button class="btn-danger btn-small" data-bulk-act="delete">' + escapeHtml(t('admin.bulkDelete')) + '</button>' +
+                    '<button class="btn-secondary btn-small" data-bulk-act="clear">' + escapeHtml(t('admin.bulkClear')) + '</button>' +
+                '</div>' +
+            '</div>';
+
+        if (existing) {
+            existing.outerHTML = html;
+        } else {
+            var header = panel.querySelector('.admin-panel-header');
+            header.insertAdjacentHTML('afterend', html);
+        }
+        bindBulkBar(kind, set);
+    }
+
+    function bindBulkBar(kind, set) {
+        var panel = document.getElementById('panel-' + kind);
+        var bar = panel.querySelector('.bulk-bar');
+        if (!bar) return;
+        bar.querySelectorAll('[data-bulk-act]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var act = btn.getAttribute('data-bulk-act');
+                handleBulkAction(kind, act, Array.from(set));
+            });
+        });
+    }
+
+    async function handleBulkAction(kind, action, ids) {
+        if (action === 'clear') { clearSelection(kind); return; }
+        var n = ids.length;
+        var titleKey, descKey, danger = true;
+        if (kind === 'users') {
+            if (action === 'delete')   { titleKey = 'admin.bulkDeleteUsersTitle';   descKey = 'admin.bulkDeleteUsersDesc'; }
+            if (action === 'block')    { titleKey = 'admin.bulkBlockUsersTitle';    descKey = 'admin.bulkBlockUsersDesc';  danger = false; }
+            if (action === 'activate') { titleKey = 'admin.bulkActivateUsersTitle'; descKey = 'admin.bulkActivateUsersDesc'; danger = false; }
+        } else {
+            if (action === 'delete')   { titleKey = 'admin.bulkDeleteUrlsTitle';    descKey = 'admin.bulkDeleteUrlsDesc'; }
+        }
+        var ok = await confirmDialog({
+            title: t(titleKey).replace('{n}', n),
+            message: t(descKey),
+            danger: danger,
+            confirmText: action === 'delete' ? t('common.delete') : t('common.confirm')
+        });
+        if (!ok) return;
+
+        var ok_count = 0, fail = 0;
+        for (var i = 0; i < ids.length; i++) {
+            try {
+                if (kind === 'users') {
+                    if (action === 'delete')   await api('DELETE', '/admin/users/' + ids[i]);
+                    if (action === 'block')    await api('PUT',    '/admin/users/' + ids[i], { is_active: false });
+                    if (action === 'activate') await api('PUT',    '/admin/users/' + ids[i], { is_active: true });
+                } else {
+                    if (action === 'delete')   await api('DELETE', '/admin/urls/' + ids[i]);
+                }
+                ok_count++;
+            } catch (_) { fail++; }
+        }
+        clearSelection(kind);
+        if (kind === 'users') await loadUsers(); else await loadUrls();
+        if (fail === 0) toast(t('admin.bulkActionDone').replace('{n}', ok_count), 2500, 'success');
+        else toast(t('admin.bulkActionPartial').replace('{ok}', ok_count).replace('{fail}', fail), 4000, 'error');
     }
 
     // ── Admin Actions (global) ───────────────────────────────
     window.__toggleUser = async function (id, activate) {
         try {
             await api('PUT', '/admin/users/' + id, { is_active: activate });
-            toast(activate ? t('admin.userActivated') : t('admin.userBlocked'));
+            toast(activate ? t('admin.userActivated') : t('admin.userBlocked'), 2500, 'success');
             loadUsers();
         } catch (err) {
-            toast(err.message, 4000);
+            toast(err.message, 4000, 'error');
         }
     };
 
     window.__deleteUser = async function (id, email) {
-        if (!confirm(t('admin.confirmDeleteUser').replace('{email}', email))) return;
+        var ok = await confirmDialog({
+            title: t('common.areYouSure'),
+            message: t('admin.confirmDeleteUser').replace('{email}', email),
+            confirmText: t('common.delete')
+        });
+        if (!ok) return;
         try {
             await api('DELETE', '/admin/users/' + id);
-            toast(t('toast.deleted'));
+            toast(t('toast.deleted'), 2500, 'success');
             loadUsers();
         } catch (err) {
-            toast(err.message, 4000);
+            toast(err.message, 4000, 'error');
         }
     };
 
     window.__deleteAdminUrl = async function (id) {
-        if (!confirm(t('admin.confirmDeleteUrl'))) return;
+        var ok = await confirmDialog({
+            title: t('common.areYouSure'),
+            message: t('admin.confirmDeleteUrl'),
+            confirmText: t('common.delete')
+        });
+        if (!ok) return;
         try {
             await api('DELETE', '/admin/urls/' + id);
-            toast(t('toast.deleted'));
+            toast(t('toast.deleted'), 2500, 'success');
             loadUrls();
         } catch (err) {
-            toast(err.message, 4000);
+            toast(err.message, 4000, 'error');
         }
     };
 
     window.__copyAdminUrl = function (url) {
-        navigator.clipboard.writeText(url).then(function () { toast(t('toast.copied')); });
+        navigator.clipboard.writeText(url).then(function () { toast(t('toast.copied'), 2500, 'success'); });
     };
 
     window.__viewUserLinks = function (userId, email) {
@@ -519,11 +869,11 @@
                 var body = { email: email, is_admin: isAdmin };
                 if (password) body.password = password;
                 await api('PUT', '/admin/users/' + id, body);
-                toast(t('admin.userUpdated'));
+                toast(t('admin.userUpdated'), 2500, 'success');
             } else {
                 // Create
                 await api('POST', '/admin/users', { email: email, password: password, is_admin: isAdmin });
-                toast(t('admin.userCreated'));
+                toast(t('admin.userCreated'), 2500, 'success');
             }
             closeUserModal();
             loadUsers();
@@ -611,7 +961,7 @@
                 body.expires_at = expiresIso;
                 body.user_id = ownerRaw === '' ? null : Number(ownerRaw);
                 await api('PUT', '/admin/urls/' + id, body);
-                toast(t('admin.urlUpdated'));
+                toast(t('admin.urlUpdated'), 2500, 'success');
             } else {
                 // Create
                 var cbody = { url: url };
@@ -619,7 +969,7 @@
                 if (expiresIso) cbody.expires_at = expiresIso;
                 if (ownerRaw !== '') cbody.user_id = Number(ownerRaw);
                 await api('POST', '/admin/urls', cbody);
-                toast(t('admin.urlCreated'));
+                toast(t('admin.urlCreated'), 2500, 'success');
             }
             closeUrlModal();
             loadUrls();
@@ -638,7 +988,7 @@
             renderAdminStats(data);
             statsModal.classList.remove('hidden');
         } catch (err) {
-            toast(err.message, 4000);
+            toast(err.message, 4000, 'error');
         }
     };
 
@@ -694,6 +1044,114 @@
             loadUrls();
         }, 250);
     });
+
+    // ── Check-all checkboxes (initial wiring) ────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        bindCheckAll('users');
+        bindCheckAll('urls');
+    });
+    // Also bind immediately for safety (script is at end of body)
+    bindCheckAll('users');
+    bindCheckAll('urls');
+
+    // ── Export dropdowns ─────────────────────────────────────
+    document.querySelectorAll('.export-wrap').forEach(function (wrap) {
+        var toggle = wrap.querySelector('[data-export-toggle]');
+        var menu   = wrap.querySelector('.export-menu');
+        toggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.querySelectorAll('.export-menu').forEach(function (m) {
+                if (m !== menu) m.classList.add('hidden');
+            });
+            menu.classList.toggle('hidden');
+        });
+        wrap.querySelectorAll('.export-option').forEach(function (opt) {
+            opt.addEventListener('click', function () {
+                menu.classList.add('hidden');
+                runExport(wrap.getAttribute('data-export-kind'), opt.getAttribute('data-export'));
+            });
+        });
+    });
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.export-menu').forEach(function (m) { m.classList.add('hidden'); });
+    });
+
+    async function runExport(kind, fmt) {
+        toast(t('toast.exporting'), 2000, 'info');
+        var rows = [];
+        try {
+            if (kind === 'users') {
+                rows = (await api('GET', '/admin/users')).map(function (u) {
+                    return {
+                        id: u.id, email: u.email,
+                        is_admin: Number(u.is_admin) === 1,
+                        is_active: Number(u.is_active) === 1,
+                        link_count: u.link_count != null ? u.link_count : 0,
+                        created_at: u.created_at
+                    };
+                });
+            } else {
+                // Fetch all pages (max 200 per page on the backend)
+                var page = 1, perPage = 200, all = [];
+                while (true) {
+                    var qs = '?page=' + page + '&per_page=' + perPage;
+                    if (urlsCurrentSearch) qs += '&q=' + encodeURIComponent(urlsCurrentSearch);
+                    var resp = await api('GET', '/admin/urls' + qs);
+                    var data = resp.data || [];
+                    all = all.concat(data);
+                    if (all.length >= (resp.total || 0) || data.length < perPage) break;
+                    page++;
+                    if (page > 100) break; // safety stop
+                }
+                rows = all.map(function (u) {
+                    return {
+                        id: u.id,
+                        short_code: u.short_code,
+                        short_url: u.short_url,
+                        original_url: u.original_url,
+                        owner_email: u.owner_email || '',
+                        clicks: u.clicks,
+                        expires_at: u.expires_at || '',
+                        created_at: u.created_at
+                    };
+                });
+            }
+        } catch (err) {
+            toast(err.message, 4000, 'error');
+            return;
+        }
+
+        var base = 'openshortener-' + kind + '-' + timestamp();
+        if (fmt === 'csv') downloadBlob(toCsv(rows), 'text/csv',           base + '.csv');
+        else                downloadBlob(JSON.stringify(rows, null, 2), 'application/json', base + '.json');
+        toast(t('toast.exportReady'), 2000, 'success');
+    }
+
+    // ── Online / offline indicator ───────────────────────────
+    var offlineBanner = null;
+    function showOfflineBanner() {
+        if (offlineBanner) return;
+        offlineBanner = document.createElement('div');
+        offlineBanner.className = 'offline-banner';
+        offlineBanner.textContent = t('toast.offline');
+        document.body.appendChild(offlineBanner);
+    }
+    function hideOfflineBanner() {
+        if (!offlineBanner) return;
+        offlineBanner.remove();
+        offlineBanner = null;
+        toast(t('toast.backOnline'), 2000, 'success');
+    }
+    window.addEventListener('online',  hideOfflineBanner);
+    window.addEventListener('offline', showOfflineBanner);
+    if (!navigator.onLine) showOfflineBanner();
+
+    // ── Service worker ───────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function () { /* ignore */ });
+        });
+    }
 
     // ── Init ─────────────────────────────────────────────────
     initTheme();

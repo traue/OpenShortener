@@ -32,8 +32,13 @@
         "editBtn": "Edit",
         "qrBtn": "QR Code",
         "confirmDelete": "Delete this link?",
+        "confirmDeleteDesc": "This action cannot be undone.",
         "editTitle": "Edit Link",
         "editUrlPlaceholder": "New destination URL",
+        "editUrlLabel": "Destination URL",
+        "editAliasLabel": "Short alias",
+        "editAliasPlaceholder": "my-link",
+        "editAliasHint": "Letters, numbers, hyphens and underscores only.",
         "editSave": "Save",
         "editCancel": "Cancel"
     },
@@ -63,7 +68,27 @@
         "deleted": "Link deleted",
         "unknownError": "Unknown error",
         "passwordChanged": "Password changed!",
-        "captchaRequired": "Please complete the captcha below."
+        "captchaRequired": "Please complete the captcha below.",
+        "offline": "You are offline. Some features may not work.",
+        "backOnline": "Back online",
+        "exporting": "Preparing export…",
+        "exportReady": "Export ready"
+    },
+    "common": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "areYouSure": "Are you sure?"
+    },
+    "empty": {
+        "noLinksTitle": "No links yet",
+        "noLinksDesc": "Shorten a URL above and your links will appear here.",
+        "noLinksFilteredTitle": "No matches",
+        "noLinksFilteredDesc": "Try a different search term.",
+        "noUsersTitle": "No users found",
+        "noUsersDesc": "Try a different search term.",
+        "noAdminLinksTitle": "No links yet",
+        "noAdminLinksDesc": "Once users start shortening, they will appear here."
     },
     "footer": {
         "terms": "Terms of Use",
@@ -160,7 +185,25 @@
         "urlUpdated": "Link updated!",
         "ownerLabel": "Owner",
         "noOwner": "No owner (anonymous)",
-        "confirmDeleteUser": "Deactivate user {email}? Their links will be kept and attached to this (now inactive) account. You can reactivate later."
+        "confirmDeleteUser": "Deactivate user {email}? Their links will be kept and attached to this (now inactive) account. You can reactivate later.",
+        "exportLabel": "Export",
+        "exportCsv": "Export as CSV",
+        "exportJson": "Export as JSON",
+        "bulkSelected": "{n} selected",
+        "bulkBlock": "Block",
+        "bulkActivate": "Activate",
+        "bulkDelete": "Delete",
+        "bulkClear": "Clear",
+        "bulkDeleteUsersTitle": "Delete {n} users?",
+        "bulkDeleteUsersDesc": "Their accounts and links will be permanently removed. This cannot be undone.",
+        "bulkBlockUsersTitle": "Block {n} users?",
+        "bulkBlockUsersDesc": "Blocked users won't be able to sign in. You can reactivate them later.",
+        "bulkActivateUsersTitle": "Activate {n} users?",
+        "bulkActivateUsersDesc": "These accounts will regain access.",
+        "bulkDeleteUrlsTitle": "Delete {n} links?",
+        "bulkDeleteUrlsDesc": "The links and their click history will be permanently removed.",
+        "bulkActionDone": "{n} item(s) updated",
+        "bulkActionPartial": "{ok} succeeded, {fail} failed"
     },
     "expired": {
         "title": "Link not found",

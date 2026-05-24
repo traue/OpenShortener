@@ -74,6 +74,13 @@
                     <div class="admin-search">
                         <input type="text" id="users-search" data-i18n-placeholder="admin.searchPlaceholder">
                     </div>
+                    <div class="export-wrap" data-export-kind="users">
+                        <button type="button" class="btn-secondary btn-small" data-export-toggle data-i18n="admin.exportLabel"></button>
+                        <div class="export-menu hidden">
+                            <button type="button" class="export-option" data-export="csv"><span class="export-option-icon">📄</span><span data-i18n="admin.exportCsv"></span></button>
+                            <button type="button" class="export-option" data-export="json"><span class="export-option-icon">{ }</span><span data-i18n="admin.exportJson"></span></button>
+                        </div>
+                    </div>
                     <button class="btn-primary btn-small" id="btn-create-user" data-i18n="admin.createUserBtn"></button>
                 </div>
             </div>
@@ -81,6 +88,7 @@
                 <table class="admin-table" id="users-table">
                     <thead>
                         <tr>
+                            <th class="col-check"><input type="checkbox" id="check-all-users"></th>
                             <th>ID</th>
                             <th data-i18n="admin.colEmail"></th>
                             <th data-i18n="admin.colStatus"></th>
@@ -103,6 +111,13 @@
                     <div class="admin-search">
                         <input type="text" id="urls-search" data-i18n-placeholder="admin.searchPlaceholder">
                     </div>
+                    <div class="export-wrap" data-export-kind="urls">
+                        <button type="button" class="btn-secondary btn-small" data-export-toggle data-i18n="admin.exportLabel"></button>
+                        <div class="export-menu hidden">
+                            <button type="button" class="export-option" data-export="csv"><span class="export-option-icon">📄</span><span data-i18n="admin.exportCsv"></span></button>
+                            <button type="button" class="export-option" data-export="json"><span class="export-option-icon">{ }</span><span data-i18n="admin.exportJson"></span></button>
+                        </div>
+                    </div>
                     <button class="btn-primary btn-small" id="btn-create-url" data-i18n="admin.createUrlBtn"></button>
                 </div>
             </div>
@@ -110,6 +125,7 @@
                 <table class="admin-table" id="urls-table">
                     <thead>
                         <tr>
+                            <th class="col-check"><input type="checkbox" id="check-all-urls"></th>
                             <th>ID</th>
                             <th data-i18n="admin.colOriginalUrl"></th>
                             <th data-i18n="admin.colShortUrl"></th>
