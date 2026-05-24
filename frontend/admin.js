@@ -351,11 +351,11 @@
             }
 
             return '<tr>' +
-                '<td class="col-id">' + u.id + '</td>' +
-                '<td>' + escapeHtml(u.email) + adminBadge + selfLabel + '</td>' +
-                '<td><span class="status-badge ' + statusClass + '">' + escapeHtml(statusText) + '</span></td>' +
-                '<td class="col-clicks">' + linkCount + '</td>' +
-                '<td class="col-date">' + formatDate(u.created_at) + '</td>' +
+                '<td class="col-id" data-label="ID">' + u.id + '</td>' +
+                '<td data-label="' + escapeHtml(t('admin.colEmail')) + '">' + escapeHtml(u.email) + adminBadge + selfLabel + '</td>' +
+                '<td data-label="' + escapeHtml(t('admin.colStatus')) + '"><span class="status-badge ' + statusClass + '">' + escapeHtml(statusText) + '</span></td>' +
+                '<td class="col-clicks" data-label="' + escapeHtml(t('admin.colLinks')) + '">' + linkCount + '</td>' +
+                '<td class="col-date" data-label="' + escapeHtml(t('admin.colCreated')) + '">' + formatDate(u.created_at) + '</td>' +
                 '<td class="col-actions">' + actions + '</td>' +
             '</tr>';
         }).join('');
@@ -375,17 +375,17 @@
             var owner = u.owner_email ? escapeHtml(u.owner_email) : '—';
 
             return '<tr>' +
-                '<td class="col-id">' + u.id + '</td>' +
-                '<td class="col-url">' +
+                '<td class="col-id" data-label="ID">' + u.id + '</td>' +
+                '<td class="col-url" data-label="' + escapeHtml(t('admin.colOriginalUrl')) + '">' +
                     '<a href="' + escapeHtml(u.original_url) + '" target="_blank" rel="noopener" title="' + escapeHtml(u.original_url) + '">' +
                         escapeHtml(u.original_url.length > 50 ? u.original_url.substring(0, 50) + '…' : u.original_url) +
                     '</a>' +
                 '</td>' +
-                '<td><a href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener" class="short-link">' + escapeHtml(u.short_url) + '</a></td>' +
-                '<td class="col-owner">' + escapeHtml(owner) + '</td>' +
-                '<td class="col-clicks">' + u.clicks + '</td>' +
-                '<td class="col-date">' + exp + '</td>' +
-                '<td class="col-date">' + formatDate(u.created_at) + '</td>' +
+                '<td data-label="' + escapeHtml(t('admin.colShortUrl')) + '"><a href="' + escapeHtml(u.short_url) + '" target="_blank" rel="noopener" class="short-link">' + escapeHtml(u.short_url) + '</a></td>' +
+                '<td class="col-owner" data-label="' + escapeHtml(t('admin.colOwner')) + '">' + escapeHtml(owner) + '</td>' +
+                '<td class="col-clicks" data-label="' + escapeHtml(t('admin.colClicks')) + '">' + u.clicks + '</td>' +
+                '<td class="col-date" data-label="' + escapeHtml(t('admin.colExpires')) + '">' + exp + '</td>' +
+                '<td class="col-date" data-label="' + escapeHtml(t('admin.colCreated')) + '">' + formatDate(u.created_at) + '</td>' +
                 '<td class="col-actions">' +
                     '<button class="btn-icon-sm" onclick="window.__editUrlModal(' + u.id + ')" title="' + escapeHtml(t('admin.editBtn')) + '">✏️</button>' +
                     '<button class="btn-icon-sm" onclick="window.__showAdminStats(' + u.id + ')" title="' + escapeHtml(t('admin.statsBtn')) + '">📊</button>' +
