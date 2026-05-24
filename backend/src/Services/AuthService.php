@@ -47,7 +47,7 @@ final class AuthService
         Session::regenerate();
         Session::set('user_id', (int) $user['id']);
 
-        return ['id' => (int) $user['id'], 'email' => $user['email']];
+        return ['id' => (int) $user['id'], 'email' => $user['email'], 'is_admin' => (bool) (int) $user['is_admin']];
     }
 
     public static function adminLogin(string $email, string $password): array

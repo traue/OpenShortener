@@ -47,12 +47,26 @@
         <section id="mylinks-section" class="mylinks-section hidden">
             <div class="mylinks-header">
                 <h1 data-i18n="myUrls.title"></h1>
-                <div class="mylinks-search">
-                    <input type="text" id="links-search" data-i18n-placeholder="admin.searchPlaceholder">
+                <div class="mylinks-search search-box">
+                    <span class="search-icon" aria-hidden="true">🔎</span>
+                    <input type="search" id="links-search" autocomplete="off" data-i18n-placeholder="myUrls.searchPlaceholder" data-i18n-title="myUrls.searchHint">
+                    <button type="button" id="links-search-clear" class="search-clear hidden" data-i18n-title="myUrls.searchClear" aria-label="Clear">×</button>
                 </div>
             </div>
+            <p id="mylinks-results-info" class="mylinks-results-info hidden"></p>
             <div id="mylinks-list" class="urls-list"></div>
-            <div id="mylinks-pagination" class="pagination"></div>
+            <div class="mylinks-footer">
+                <div id="mylinks-pagination" class="pagination"></div>
+                <label class="per-page-label">
+                    <span data-i18n="myUrls.perPage"></span>
+                    <select id="links-per-page" class="per-page-select">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </label>
+            </div>
         </section>
 
         <!-- Stats Modal -->

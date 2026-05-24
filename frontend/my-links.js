@@ -12,10 +12,11 @@
     var langCode = '';
     var allUrls = [];
     var currentPage = 1;
-    var perPage = 10;
+    var perPage = parseInt(localStorage.getItem('mylinks_per_page'), 10) || 10;
     var totalUrls = 0;
     var currentSearch = '';
     var searchDebounce = null;
+    var loadSeq = 0; // monotonic request counter to drop stale responses
 
     // ── DOM refs ─────────────────────────────────────────────
     var $ = function (sel) { return document.querySelector(sel); };
@@ -32,6 +33,9 @@
     var mylinksSection = $('#mylinks-section');
     var mylinksList  = $('#mylinks-list');
     var linksSearch  = $('#links-search');
+    var linksSearchClear = $('#links-search-clear');
+    var resultsInfo  = $('#mylinks-results-info');
+    var perPageSelect = $('#links-per-page');
     var statsModal   = $('#stats-modal');
     var passwordModal = $('#password-modal');
     var passwordForm  = $('#password-form');
@@ -261,8 +265,12 @@
     // ── Auth UI ──────────────────────────────────────────────
     function renderAuthArea() {
         if (currentUser) {
+            var adminLink = currentUser.is_admin
+                ? '<a href="/admin" class="btn-secondary btn-small admin-link" title="' + escapeHtml(t('header.adminPanel')) + '"><span aria-hidden="true">🛡️</span><span class="admin-link-label">' + escapeHtml(t('header.adminPanel')) + '</span></a>'
+                : '';
             authArea.innerHTML =
-                '<span style="font-size:0.9rem;color:var(--text-secondary)">' + escapeHtml(currentUser.email) + '</span>' +
+                '<span class="auth-email">' + escapeHtml(currentUser.email) + '</span>' +
+                adminLink +
                 '<button class="btn-secondary btn-small" id="change-pw-btn" title="' + escapeHtml(t('auth.changePasswordLink')) + '">🔒</button>' +
                 '<button class="btn-secondary btn-small" id="logout-btn">' + escapeHtml(t('auth.logoutBtn')) + '</button>';
             $('#change-pw-btn').addEventListener('click', function () { passwordModal.classList.remove('hidden'); });
@@ -299,39 +307,115 @@
     // ── Load My URLs ─────────────────────────────────────────
     var firstLoad = true;
     async function loadMyUrls() {
+        var seq = ++loadSeq;
         if (firstLoad) {
             renderSkeletonCards(3);
             firstLoad = false;
         }
+        mylinksSection.classList.add('is-loading');
         try {
             var qs = '?page=' + currentPage + '&per_page=' + perPage;
             if (currentSearch) qs += '&q=' + encodeURIComponent(currentSearch);
             var resp = await api('GET', '/my-urls' + qs);
+            // Drop stale response (user typed again before this one arrived)
+            if (seq !== loadSeq) return;
             allUrls = resp.data || [];
             totalUrls = resp.total || 0;
             renderMyUrls(allUrls);
             renderPagination();
+            renderResultsInfo();
         } catch (err) {
-            mylinksList.innerHTML = '';
+            if (seq !== loadSeq) return;
+            allUrls = [];
+            totalUrls = 0;
+            renderMyUrls([]);
+            renderPagination();
+            renderResultsInfo();
             toast(err.message, 4000, 'error');
+        } finally {
+            if (seq === loadSeq) mylinksSection.classList.remove('is-loading');
         }
     }
 
+    // ── Results info ─────────────────────────────────────────
+    function renderResultsInfo() {
+        if (!resultsInfo) return;
+        if (!totalUrls) { resultsInfo.classList.add('hidden'); return; }
+        var from = (currentPage - 1) * perPage + 1;
+        var to   = Math.min(currentPage * perPage, totalUrls);
+        var key  = currentSearch ? 'myUrls.searchResults' : 'myUrls.showing';
+        var text = t(key)
+            .replace('{from}', from)
+            .replace('{to}',   to)
+            .replace('{total}', totalUrls)
+            .replace('{query}', currentSearch);
+        resultsInfo.textContent = text;
+        resultsInfo.classList.remove('hidden');
+    }
+
+    // ── Pagination ───────────────────────────────────────────
     function renderPagination() {
         if (!paginationEl) return;
         var totalPages = Math.max(1, Math.ceil(totalUrls / perPage));
         if (totalUrls <= perPage) { paginationEl.innerHTML = ''; return; }
-        var prev = currentPage > 1
-            ? '<button class="btn-secondary btn-small" id="page-prev">←</button>'
-            : '<button class="btn-secondary btn-small" disabled>←</button>';
-        var next = currentPage < totalPages
-            ? '<button class="btn-secondary btn-small" id="page-next">→</button>'
-            : '<button class="btn-secondary btn-small" disabled>→</button>';
-        paginationEl.innerHTML = prev +
-            '<span class="page-info">' + currentPage + ' / ' + totalPages + ' · ' + totalUrls + '</span>' +
-            next;
-        var pp = $('#page-prev'); if (pp) pp.addEventListener('click', function () { currentPage--; loadMyUrls(); });
-        var pn = $('#page-next'); if (pn) pn.addEventListener('click', function () { currentPage++; loadMyUrls(); });
+
+        var html = '';
+        // Prev
+        html += pageButton('←', currentPage > 1 ? currentPage - 1 : null, false);
+
+        // Numeric pages with ellipsis. Window of 1 page around current,
+        // always show first and last.
+        var pages = pageList(currentPage, totalPages);
+        pages.forEach(function (p) {
+            if (p === '…') {
+                html += '<span class="page-ellipsis">…</span>';
+            } else {
+                html += pageButton(String(p), p, p === currentPage);
+            }
+        });
+
+        // Next
+        html += pageButton('→', currentPage < totalPages ? currentPage + 1 : null, false);
+
+        paginationEl.innerHTML = html;
+        paginationEl.querySelectorAll('button[data-go]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var to = parseInt(btn.getAttribute('data-go'), 10);
+                if (!isNaN(to) && to !== currentPage) {
+                    currentPage = to;
+                    loadMyUrls();
+                    scrollToTopOfList();
+                }
+            });
+        });
+    }
+
+    function pageButton(label, target, active) {
+        var cls = 'btn-secondary btn-small page-btn' + (active ? ' active' : '');
+        if (target === null) return '<button class="' + cls + '" disabled>' + label + '</button>';
+        return '<button class="' + cls + '" data-go="' + target + '">' + label + '</button>';
+    }
+
+    function pageList(current, total) {
+        if (total <= 7) {
+            var out = [];
+            for (var i = 1; i <= total; i++) out.push(i);
+            return out;
+        }
+        var pages = [1];
+        var start = Math.max(2, current - 1);
+        var end   = Math.min(total - 1, current + 1);
+        if (start > 2) pages.push('…');
+        for (var j = start; j <= end; j++) pages.push(j);
+        if (end < total - 1) pages.push('…');
+        pages.push(total);
+        return pages;
+    }
+
+    function scrollToTopOfList() {
+        if (!mylinksList) return;
+        var top = mylinksList.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: top < 0 ? 0 : top, behavior: 'smooth' });
     }
 
     function renderMyUrls(urls) {
@@ -363,14 +447,62 @@
     }
 
     // ── Search / Filter (server-side, debounced) ─────────────
+    function runSearch() {
+        currentSearch = linksSearch.value.trim();
+        currentPage = 1;
+        linksSearchClear.classList.toggle('hidden', currentSearch === '');
+        loadMyUrls();
+    }
+
     linksSearch.addEventListener('input', function () {
+        // Toggle clear button instantly for snappy feel
+        linksSearchClear.classList.toggle('hidden', linksSearch.value === '');
         clearTimeout(searchDebounce);
-        searchDebounce = setTimeout(function () {
-            currentSearch = linksSearch.value.trim();
+        searchDebounce = setTimeout(runSearch, 150);
+    });
+
+    // Enter triggers immediate search (skip debounce)
+    linksSearch.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(searchDebounce);
+            runSearch();
+        } else if (e.key === 'Escape' && linksSearch.value) {
+            e.preventDefault();
+            linksSearch.value = '';
+            clearTimeout(searchDebounce);
+            runSearch();
+        }
+    });
+
+    linksSearchClear.addEventListener('click', function () {
+        linksSearch.value = '';
+        clearTimeout(searchDebounce);
+        runSearch();
+        linksSearch.focus();
+    });
+
+    // Global "/" shortcut focuses search (like GitHub)
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== '/') return;
+        var tag = (e.target && e.target.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (!currentUser) return;
+        e.preventDefault();
+        linksSearch.focus();
+        linksSearch.select();
+    });
+
+    // ── Per-page selector ────────────────────────────────────
+    if (perPageSelect) {
+        perPageSelect.value = String(perPage);
+        perPageSelect.addEventListener('change', function () {
+            perPage = parseInt(perPageSelect.value, 10) || 10;
+            localStorage.setItem('mylinks_per_page', String(perPage));
             currentPage = 1;
             loadMyUrls();
-        }, 250);
-    });
+        });
+    }
 
     // ── Global actions ───────────────────────────────────────
     window.__copyUrl = function (url) {

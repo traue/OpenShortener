@@ -5,7 +5,8 @@
         "flag": "🇧🇷"
     },
     "header": {
-        "themeToggle": "Alternar tema"
+        "themeToggle": "Alternar tema",
+        "adminPanel": "Painel admin"
     },
     "hero": {
         "title": "Encurte seus links",
@@ -40,7 +41,14 @@
         "editAliasPlaceholder": "meu-link",
         "editAliasHint": "Apenas letras, números, hífens e underscores.",
         "editSave": "Salvar",
-        "editCancel": "Cancelar"
+        "editCancel": "Cancelar",
+        "searchPlaceholder": "Buscar por URL ou alias…",
+        "searchHint": "Pressione / para focar",
+        "searchClear": "Limpar busca",
+        "searchResults": "{total} resultado(s) para \"{query}\" — mostrando {from}–{to}",
+        "showing": "Mostrando {from}–{to} de {total}",
+        "perPage": "Por página:",
+        "noResults": "Nenhum link corresponde à sua busca."
     },
     "auth": {
         "loginTab": "Entrar",

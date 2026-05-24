@@ -5,7 +5,8 @@
         "flag": "🇪🇸"
     },
     "header": {
-        "themeToggle": "Cambiar tema"
+        "themeToggle": "Cambiar tema",
+        "adminPanel": "Panel admin"
     },
     "hero": {
         "title": "Acorta tus enlaces",
@@ -40,7 +41,14 @@
         "editAliasPlaceholder": "mi-enlace",
         "editAliasHint": "Solo letras, números, guiones y guiones bajos.",
         "editSave": "Guardar",
-        "editCancel": "Cancelar"
+        "editCancel": "Cancelar",
+        "searchPlaceholder": "Buscar por URL o alias…",
+        "searchHint": "Presiona / para enfocar",
+        "searchClear": "Limpiar búsqueda",
+        "searchResults": "{total} resultado(s) para \"{query}\" — mostrando {from}–{to}",
+        "showing": "Mostrando {from}–{to} de {total}",
+        "perPage": "Por página:",
+        "noResults": "Ningún enlace coincide con tu búsqueda."
     },
     "auth": {
         "loginTab": "Iniciar sesión",

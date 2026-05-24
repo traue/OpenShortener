@@ -5,7 +5,8 @@
         "flag": "🇺🇸"
     },
     "header": {
-        "themeToggle": "Toggle theme"
+        "themeToggle": "Toggle theme",
+        "adminPanel": "Admin panel"
     },
     "hero": {
         "title": "Shorten your links",
@@ -40,7 +41,14 @@
         "editAliasPlaceholder": "my-link",
         "editAliasHint": "Letters, numbers, hyphens and underscores only.",
         "editSave": "Save",
-        "editCancel": "Cancel"
+        "editCancel": "Cancel",
+        "searchPlaceholder": "Search by URL or alias…",
+        "searchHint": "Press / to focus",
+        "searchClear": "Clear search",
+        "searchResults": "{total} result(s) for \"{query}\" — showing {from}–{to}",
+        "showing": "Showing {from}–{to} of {total}",
+        "perPage": "Per page:",
+        "noResults": "No links match your search."
     },
     "auth": {
         "loginTab": "Sign in",

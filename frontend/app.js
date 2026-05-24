@@ -211,8 +211,12 @@
     // ── Auth UI ──────────────────────────────────────────────
     function renderAuthArea() {
         if (currentUser) {
+            var adminLink = currentUser.is_admin
+                ? '<a href="/admin" class="btn-secondary btn-small admin-link" title="' + escapeHtml(t('header.adminPanel')) + '"><span aria-hidden="true">🛡️</span><span class="admin-link-label">' + escapeHtml(t('header.adminPanel')) + '</span></a>'
+                : '';
             authArea.innerHTML =
-                '<span style="font-size:0.9rem;color:var(--text-secondary)">' + escapeHtml(currentUser.email) + '</span>' +
+                '<span class="auth-email">' + escapeHtml(currentUser.email) + '</span>' +
+                adminLink +
                 '<button class="btn-secondary btn-small" id="change-pw-btn" title="' + escapeHtml(t('auth.changePasswordLink')) + '">🔒</button>' +
                 '<button class="btn-secondary btn-small" id="logout-btn">' + escapeHtml(t('auth.logoutBtn')) + '</button>';
             $('#change-pw-btn').addEventListener('click', function () { passwordModal.classList.remove('hidden'); });
