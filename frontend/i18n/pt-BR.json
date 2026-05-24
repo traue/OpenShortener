@@ -32,8 +32,13 @@
         "editBtn": "Editar",
         "qrBtn": "QR Code",
         "confirmDelete": "Excluir este link?",
+        "confirmDeleteDesc": "Esta ação não pode ser desfeita.",
         "editTitle": "Editar Link",
         "editUrlPlaceholder": "Nova URL de destino",
+        "editUrlLabel": "URL de destino",
+        "editAliasLabel": "Alias curto",
+        "editAliasPlaceholder": "meu-link",
+        "editAliasHint": "Apenas letras, números, hífens e underscores.",
         "editSave": "Salvar",
         "editCancel": "Cancelar"
     },
@@ -63,7 +68,27 @@
         "deleted": "Link excluído",
         "unknownError": "Erro desconhecido",
         "passwordChanged": "Senha alterada!",
-        "captchaRequired": "Por favor, complete o captcha abaixo."
+        "captchaRequired": "Por favor, complete o captcha abaixo.",
+        "offline": "Você está offline. Algumas funções podem não funcionar.",
+        "backOnline": "De volta online",
+        "exporting": "Preparando exportação…",
+        "exportReady": "Exportação pronta"
+    },
+    "common": {
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "delete": "Excluir",
+        "areYouSure": "Tem certeza?"
+    },
+    "empty": {
+        "noLinksTitle": "Nenhum link ainda",
+        "noLinksDesc": "Encurte uma URL acima e seus links aparecerão aqui.",
+        "noLinksFilteredTitle": "Nenhum resultado",
+        "noLinksFilteredDesc": "Tente uma busca diferente.",
+        "noUsersTitle": "Nenhum usuário encontrado",
+        "noUsersDesc": "Tente uma busca diferente.",
+        "noAdminLinksTitle": "Nenhum link ainda",
+        "noAdminLinksDesc": "Quando os usuários começarem a encurtar, eles aparecerão aqui."
     },
     "footer": {
         "terms": "Termos de Uso",
@@ -160,7 +185,25 @@
         "urlUpdated": "Link atualizado!",
         "ownerLabel": "Dono",
         "noOwner": "Sem dono (anônimo)",
-        "confirmDeleteUser": "Desativar o usuário {email}? Os links dele serão mantidos e ficarão atrelados a esta conta (agora inativa). Você pode reativar depois."
+        "confirmDeleteUser": "Desativar o usuário {email}? Os links dele serão mantidos e ficarão atrelados a esta conta (agora inativa). Você pode reativar depois.",
+        "exportLabel": "Exportar",
+        "exportCsv": "Exportar como CSV",
+        "exportJson": "Exportar como JSON",
+        "bulkSelected": "{n} selecionado(s)",
+        "bulkBlock": "Bloquear",
+        "bulkActivate": "Ativar",
+        "bulkDelete": "Excluir",
+        "bulkClear": "Limpar",
+        "bulkDeleteUsersTitle": "Excluir {n} usuários?",
+        "bulkDeleteUsersDesc": "As contas e links serão removidos permanentemente. Isso não pode ser desfeito.",
+        "bulkBlockUsersTitle": "Bloquear {n} usuários?",
+        "bulkBlockUsersDesc": "Usuários bloqueados não conseguirão fazer login. Você pode reativar depois.",
+        "bulkActivateUsersTitle": "Ativar {n} usuários?",
+        "bulkActivateUsersDesc": "Essas contas voltarão a ter acesso.",
+        "bulkDeleteUrlsTitle": "Excluir {n} links?",
+        "bulkDeleteUrlsDesc": "Os links e o histórico de cliques serão removidos permanentemente.",
+        "bulkActionDone": "{n} item(s) atualizado(s)",
+        "bulkActionPartial": "{ok} sucesso(s), {fail} falha(s)"
     },
     "expired": {
         "title": "Link não encontrado",

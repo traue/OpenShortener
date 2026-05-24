@@ -32,8 +32,13 @@
         "editBtn": "Editar",
         "qrBtn": "Código QR",
         "confirmDelete": "¿Eliminar este enlace?",
+        "confirmDeleteDesc": "Esta acción no se puede deshacer.",
         "editTitle": "Editar Enlace",
         "editUrlPlaceholder": "Nueva URL de destino",
+        "editUrlLabel": "URL de destino",
+        "editAliasLabel": "Alias corto",
+        "editAliasPlaceholder": "mi-enlace",
+        "editAliasHint": "Solo letras, números, guiones y guiones bajos.",
         "editSave": "Guardar",
         "editCancel": "Cancelar"
     },
@@ -63,7 +68,27 @@
         "deleted": "Enlace eliminado",
         "unknownError": "Error desconocido",
         "passwordChanged": "¡Contraseña cambiada!",
-        "captchaRequired": "Por favor, completa el captcha a continuación."
+        "captchaRequired": "Por favor, completa el captcha a continuación.",
+        "offline": "Estás sin conexión. Algunas funciones pueden no funcionar.",
+        "backOnline": "De vuelta en línea",
+        "exporting": "Preparando exportación…",
+        "exportReady": "Exportación lista"
+    },
+    "common": {
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "areYouSure": "¿Estás seguro?"
+    },
+    "empty": {
+        "noLinksTitle": "Aún no hay enlaces",
+        "noLinksDesc": "Acorta una URL arriba y tus enlaces aparecerán aquí.",
+        "noLinksFilteredTitle": "Sin resultados",
+        "noLinksFilteredDesc": "Prueba con otra búsqueda.",
+        "noUsersTitle": "No se encontraron usuarios",
+        "noUsersDesc": "Prueba con otra búsqueda.",
+        "noAdminLinksTitle": "Aún no hay enlaces",
+        "noAdminLinksDesc": "Cuando los usuarios empiecen a acortar, aparecerán aquí."
     },
     "footer": {
         "terms": "Términos de Uso",
@@ -160,7 +185,25 @@
         "urlUpdated": "¡Enlace actualizado!",
         "ownerLabel": "Propietario",
         "noOwner": "Sin propietario (anónimo)",
-        "confirmDeleteUser": "¿Desactivar al usuario {email}? Sus enlaces se mantendrán y quedarán vinculados a esta cuenta (ahora inactiva). Puedes reactivarla luego."
+        "confirmDeleteUser": "¿Desactivar al usuario {email}? Sus enlaces se mantendrán y quedarán vinculados a esta cuenta (ahora inactiva). Puedes reactivarla luego.",
+        "exportLabel": "Exportar",
+        "exportCsv": "Exportar como CSV",
+        "exportJson": "Exportar como JSON",
+        "bulkSelected": "{n} seleccionado(s)",
+        "bulkBlock": "Bloquear",
+        "bulkActivate": "Activar",
+        "bulkDelete": "Eliminar",
+        "bulkClear": "Limpiar",
+        "bulkDeleteUsersTitle": "¿Eliminar {n} usuarios?",
+        "bulkDeleteUsersDesc": "Las cuentas y enlaces se eliminarán permanentemente. Esta acción no se puede deshacer.",
+        "bulkBlockUsersTitle": "¿Bloquear {n} usuarios?",
+        "bulkBlockUsersDesc": "Los usuarios bloqueados no podrán iniciar sesión. Puedes reactivarlos luego.",
+        "bulkActivateUsersTitle": "¿Activar {n} usuarios?",
+        "bulkActivateUsersDesc": "Estas cuentas recuperarán el acceso.",
+        "bulkDeleteUrlsTitle": "¿Eliminar {n} enlaces?",
+        "bulkDeleteUrlsDesc": "Los enlaces y su historial de clics se eliminarán permanentemente.",
+        "bulkActionDone": "{n} elemento(s) actualizado(s)",
+        "bulkActionPartial": "{ok} con éxito, {fail} con error"
     },
     "expired": {
         "title": "Enlace no encontrado",
